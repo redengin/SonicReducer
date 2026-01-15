@@ -47,3 +47,7 @@ Guidance
 --------------------------------------------------------------------------------
 If the voltage level of your amplifier vs SoC mismatch, you can use multiple
 power sources coupled to a common ground.
+
+Each amplifier can support multiple speakers in parallel. Each additional
+speaker increases the current draw. The more current drawn, the hotter the
+amplifier gets - if the amplifier gets too hot, it'll fail.
