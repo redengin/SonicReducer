@@ -45,5 +45,5 @@ This project leverages embedded hardware to perform this function
 
 Guidance
 --------------------------------------------------------------------------------
-If you amplifier's voltage and SoC mismatch, you can use multiple power sources
-coupled to a common ground.
+If the voltage level of your amplifier vs SoC mismatch, you can use multiple
+power sources coupled to a common ground.
