@@ -51,3 +51,10 @@ power sources coupled to a common ground.
 Each amplifier can support multiple speakers in parallel. Each additional
 speaker increases the current draw. The more current drawn, the hotter the
 amplifier gets - if the amplifier gets too hot, it'll fail.
+
+### For a demonstration project, I'm using
+* (10) TCT40-16T [Amazon Source](https://www.amazon.com/hiBCTR-40PCS-TCT40-16R-Ultrasonic-Sensor/dp/B0FND34DNY/)
+* (1) L298N [Amazon Source](https://www.amazon.com/JTAREA-L298N-Motor-Driver-H-Bridge/dp/B0D2RLY7GH)
+* (1) ESP32-DevKitC [Amazon Source](https://www.amazon.com/HiLetgo-ESP-WROOM-32-Bluetooth-ESP32-DevKitC-32-Development/dp/B0CNYK7WT2/)
+
+Which shouldn't pose a safety hazard as it's relatively low powered.
