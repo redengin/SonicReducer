@@ -19,10 +19,12 @@ git = "https://github.com/esp-rs/esp-hal"
 # features = ["log-04", "unstable"]
 features = ["esp32", "unstable"]
 
-# support for the ESP32 supplied panic handler
+# provide println driver for logging
 [dependencies.esp-println]
 git = "https://github.com/esp-rs/esp-hal"
 features = ["esp32", "log-04"]
+
+# (optional) provide ESP32 supplied panic handler
 [dependencies.esp-backtrace]
 git = "https://github.com/esp-rs/esp-hal"
 features = ["esp32", "println", "colors"]
@@ -36,6 +38,7 @@ features = ["esp32", "embassy", "esp-radio", "esp-alloc"]
 [dependencies.esp-radio]
 git = "https://github.com/esp-rs/esp-hal"
 features = ["esp32", "wifi", "unstable"]
+# alloc required by esp-radio
 [dependencies.esp-alloc]
 git = "https://github.com/esp-rs/esp-hal"
 features = [
@@ -44,7 +47,6 @@ features = [
 ]
 # support reclaiming bootloader RAM for esp-alloc
 [dependencies.esp-bootloader-esp-idf]
-# required to reclaim boot memory
 git = "https://github.com/esp-rs/esp-hal"
 features = ["esp32"]
 
