@@ -37,11 +37,16 @@ Amplifiers heat up as you transfer power through them.
         * Typical - 20KHz
         * Max - 40KHz
 
-Modulator and Audio
+Modulator and Audio SoC - (System On a Chip)
 --------------------------------------------------------------------------------
-This project leverages embedded hardware to perform this function
-(see target docs for more details).
+This project leverages embedded SoC hardware to perform this function
+(see specific target docs for more details).
 * Most platforms provide a voltage regulator that supports voltages up to 10 V.
+
+### ESP32
+* Provides an APLL (Audio Phase-Locked Loop) to perform the modulation
+* Supports BlueTooth, so the speaker can effectively be used like any other
+    BlueTooth speaker (pairing, audio transfer).
 
 Guidance
 --------------------------------------------------------------------------------
