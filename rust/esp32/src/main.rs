@@ -9,13 +9,13 @@ use sonic_reducer_esp32::{self as _};
 use log::*;
 
 // provide heap allocator
-use sonic_reducer_esp32::{create_heap};
+// use sonic_reducer_esp32::{create_heap};
 
 // provice scheduling primitives
 use embassy_time::{Duration, Timer};
 
 #[esp_rtos::main]
-async fn main(_spawner: embassy_executor::Spawner) -> ! {
+async fn main(spawner: embassy_executor::Spawner) -> ! {
 
     // initialize the SoC interface
     let peripherals = esp_hal::init(
@@ -28,9 +28,6 @@ async fn main(_spawner: embassy_executor::Spawner) -> ! {
     esp_println::logger::init_logger_from_env();
     info!("initializing");
 
-    // use default 64K heap (required by radio)
-    create_heap!();
-
     // initialize the rtos
     use esp_hal::timer::timg::TimerGroup;
     let timg0 = TimerGroup::new(peripherals.TIMG0);
@@ -38,9 +35,14 @@ async fn main(_spawner: embassy_executor::Spawner) -> ! {
     let sw_int = SoftwareInterruptControl::new(peripherals.SW_INTERRUPT);
     esp_rtos::start(timg0.timer0, sw_int.software_interrupt0);
 
+    // start the modulator
+    spawner.spawn(task_modulator()).unwrap();
+    // let (mut rx_buffer, rx_desriptors, _, _)  = dma_buffers!(4 * 4092, 0);
 
 
     // initialize the bluetooth hardware
+    // use default 64K heap (required by radio)
+    // create_heap!();
     // FIXME esp32_radio currently only supports BLE
     // https://github.com/esp-rs/esp-hal/issues/3401
 
@@ -51,3 +53,11 @@ async fn main(_spawner: embassy_executor::Spawner) -> ! {
     }
 }
 
+
+#[embassy_executor::task]
+async fn task_modulator() -> ! {
+    loop{
+        info!("modulating");
+        Timer::after(Duration::from_secs(1)).await;
+    }
+}
