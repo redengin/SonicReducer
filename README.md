@@ -9,7 +9,7 @@ This project provides
 * parametric speaker design
     * amplifier guidance
 * embedded rust to create the signal
-    * Bluetooth support
-        * Use device as Bluetooth speaker
-        * Configure device properties
+* Bluetooth support
+    * Use device as Bluetooth speaker
+    * Configure device properties
 

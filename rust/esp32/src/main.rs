@@ -39,12 +39,10 @@ async fn main(_spawner: embassy_executor::Spawner) -> ! {
     esp_rtos::start(timg0.timer0, sw_int.software_interrupt0);
 
 
+    // initialize the bluetooth hardware
+    // FIXME esp32_radio currently only supports BLE
+    // https://github.com/esp-rs/esp-hal/issues/3401
 
-    // #[allow(unused)]
-    // let peripherals = esp_hal::init(esp_hal::Config::default());
-    // let delay = Delay::new();
-
-    // esp_println::logger::init_logger_from_env();
 
     loop {
         info!("Hello world!");
