@@ -1,6 +1,6 @@
 [package]
 name = "sonic-reducer-esp32"
-edition = "2021"
+edition = "2024"
 version = "0.1.0"
 authors = ["Stephen Holstein"]
 license = "Apache-2.0"
@@ -9,7 +9,8 @@ license = "Apache-2.0"
 log = "*"
 
 # use embassy rtos
-embassy-executor = { version = "*", features = [] }
+embassy-executor = { version = "*" }
+embassy-time = { version = "*" }
 
 # ESP32 cargo using git (rather than cargo version)
 # - as cargo release isn't great for WiFi/Bluetooth
@@ -29,13 +30,18 @@ features = ["esp32", "println", "colors"]
 # support ESP32 rtos
 [dependencies.esp-rtos]
 git = "https://github.com/esp-rs/esp-hal"
-# features = ["embassy", "log-04", "esp-radio"]
-features = ["esp32", "embassy", "esp-radio"]
+features = ["esp32", "embassy", "esp-radio", "esp-alloc"]
 
 # support ESP32 radio
-[dependencies.esp-alloc]
-# esp-alloc = "*" # { version = "*", features = ["internal-heap-stats"] }
+[dependencies.esp-radio]
 git = "https://github.com/esp-rs/esp-hal"
+features = ["esp32", "wifi", "unstable"]
+[dependencies.esp-alloc]
+git = "https://github.com/esp-rs/esp-hal"
+features = [
+    "esp32",
+    # "internal-heap-stats",  # used to debug memory leaks in esp32 HAL radio
+]
 # support reclaiming bootloader RAM for esp-alloc
 [dependencies.esp-bootloader-esp-idf]
 # required to reclaim boot memory

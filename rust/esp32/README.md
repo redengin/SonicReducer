@@ -1,5 +1,6 @@
 # Building/Flashing ESP32
 ```sh
+# make sure you've setup esp rust environment (aka export-esp.sh)
 cargo run
 ```
 

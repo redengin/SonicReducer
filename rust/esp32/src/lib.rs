@@ -29,18 +29,9 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
 
 #[macro_export]
 macro_rules! create_heap {
+    // provide 64K heap (reclaimed from bootloader)
     () => {
         const BOOTLOADER_RAM_SZ: usize = 64 * 1024;
         esp_alloc::heap_allocator!(#[esp_hal::ram(reclaimed)] size: BOOTLOADER_RAM_SZ);
-    }
-    // ($size:literal) => {
-    //     const BOOTLOADER_RAM_SZ: usize = 64 * 1024;
-    //     esp_alloc::heap_allocator!(#[esp_hal::ram(reclaimed)] size: BOOTLOADER_RAM_SZ);
-
-    //     // FIXME rust doesn't allow comprehension
-    //     // if $size > BOOTLOADER_RAM_SZ {
-    //     //     const more: usize = $size - BOOTLOADER_RAM_SZ;
-    //     //     // esp_alloc::heap_allocator!(#[esp_hal::ram(reclaimed)] size: $size - BOOTLOADER_RAM_SZ);
-    //     // }
-    // }
+    };
 }
