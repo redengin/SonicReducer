@@ -1,0 +1,58 @@
+[package]
+name = "sonic-reducer-esp32"
+edition = "2021"
+version = "0.1.0"
+authors = ["Stephen Holstein"]
+license = "Apache-2.0"
+
+[dependencies]
+log = "*"
+
+# use embassy rtos
+embassy-executor = { version = "*", features = [] }
+
+# ESP32 cargo using git (rather than cargo version)
+# - as cargo release isn't great for WiFi/Bluetooth
+[dependencies.esp-hal]
+git = "https://github.com/esp-rs/esp-hal"
+# features = ["log-04", "unstable"]
+features = ["esp32", "unstable"]
+
+# support for the ESP32 supplied panic handler
+[dependencies.esp-println]
+git = "https://github.com/esp-rs/esp-hal"
+features = ["esp32", "log-04"]
+[dependencies.esp-backtrace]
+git = "https://github.com/esp-rs/esp-hal"
+features = ["esp32", "println", "colors"]
+
+# support ESP32 rtos
+[dependencies.esp-rtos]
+git = "https://github.com/esp-rs/esp-hal"
+# features = ["embassy", "log-04", "esp-radio"]
+features = ["esp32", "embassy", "esp-radio"]
+
+# support ESP32 radio
+[dependencies.esp-alloc]
+# esp-alloc = "*" # { version = "*", features = ["internal-heap-stats"] }
+git = "https://github.com/esp-rs/esp-hal"
+# support reclaiming bootloader RAM for esp-alloc
+[dependencies.esp-bootloader-esp-idf]
+# required to reclaim boot memory
+git = "https://github.com/esp-rs/esp-hal"
+features = ["esp32"]
+
+
+[profile.dev]
+# Rust debug is too slow.
+# For debug builds always builds with some optimization
+opt-level = "s"
+
+[profile.release]
+codegen-units = 1        # LLVM can perform better optimizations using a single thread
+debug = 2
+debug-assertions = false
+incremental = false
+lto = 'fat'
+opt-level = 's'
+overflow-checks = false

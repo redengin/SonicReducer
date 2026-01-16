@@ -8,7 +8,7 @@ Sonic Reducer
 This project provides
 * parametric speaker design
     * amplifier guidance
-* embedded hardware to create the signal
+* embedded rust to create the signal
     * Bluetooth support
         * Use device as Bluetooth speaker
         * Configure device properties
