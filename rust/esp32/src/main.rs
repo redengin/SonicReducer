@@ -36,6 +36,11 @@ async fn main(spawner: embassy_executor::Spawner) -> ! {
     esp_rtos::start(timg0.timer0, sw_int.software_interrupt0);
 
     // start the modulator
+    let i2s = esp_hal::i2s::master::I2s::new(
+        peripherals.I2S0,
+        peripherals.DMA_I2S0,
+        esp_hal::i2s::master::Config::new_tdm_msb() // FIXME
+    );
     spawner.spawn(task_modulator()).unwrap();
     // let (mut rx_buffer, rx_desriptors, _, _)  = dma_buffers!(4 * 4092, 0);
 
