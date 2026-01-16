@@ -1,12 +1,17 @@
-# Building/Flashing ESP32
+Building/Flashing ESP32
+--------------------------------------------------------------------------------
 ```sh
 # make sure you've setup esp rust environment (aka export-esp.sh)
 cargo run
 ```
 
+Functions
+--------------------------------------------------------------------------------
+* [Modulation](docs/modulation.md) - FM modulation
+* [BlueTooth](docs/bluetooth.md)
+    * at this time esp32 rust doesn't support BlueTooth legacy
 
-
-
+--------------------------------------------------------------------------------
 ### How this project was created
 #### Prerequisites [Setting up for ESP32 Rust]()
 * [RISC-V and Xtensa](https://docs.esp-rs.org/book/installation/riscv-and-xtensa.html)
