@@ -1,10 +1,13 @@
 Parametric Speaker System
 ================================================================================
 ```mermaid
-zenuml
-    Audio -> Modulator
-    Modulator -> Amplifier
-    Amplifier -> "Speaker(s)"
+---
+title: Hardware Functional Overview
+---
+flowchart LR
+    Audio       -->     Modulator
+    Modulator   -->     Amplifier
+    Amplifier   -->     Speakers
 ```
 `Audio` signal in human hearing range.
 
