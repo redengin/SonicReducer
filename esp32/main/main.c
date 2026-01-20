@@ -7,7 +7,7 @@
 void app_main(void)
 {
     // initialize bluetooth audio receiver
-
+    bt_a2dp_init();
 
     // initialize the modulator
     modulator_init();
