@@ -8,6 +8,7 @@ cargo run
 Functions
 --------------------------------------------------------------------------------
 * [Modulation](docs/modulation.md) - FM modulation
+    * at this this time esp32 rust doesn't support I2S for modulation
 * [BlueTooth](docs/bluetooth.md)
     * at this time esp32 rust doesn't support BlueTooth legacy
 

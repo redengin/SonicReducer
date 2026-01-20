@@ -1,10 +1,14 @@
 #include <stdbool.h>
 #include <freertos/FreeRTOS.h>
 
+#include "bt_a2dp.h"
 #include "modulator.h"
 
 void app_main(void)
 {
+    // initialize bluetooth audio receiver
+
+
     // initialize the modulator
     modulator_init();
 
@@ -17,7 +21,6 @@ void app_main(void)
     modulator_start();
     modulator_stop();
 
-    // initialize bluetooth
 
     while (true)
         vTaskDelay(pdMS_TO_TICKS(1000));

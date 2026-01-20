@@ -1,3 +1,5 @@
+// inspired by https://github.com/Alexxdal/ESP32FMRadio/
+
 #include "modulator.h"
 
 #include <soc/io_mux_reg.h>
