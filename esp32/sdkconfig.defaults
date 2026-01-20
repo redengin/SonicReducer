@@ -1,0 +1,2 @@
+# enable bluetooth support
+CONFIG_BT_ENABLED=y
