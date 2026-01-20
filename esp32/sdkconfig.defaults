@@ -1,2 +1,5 @@
 # enable bluetooth support
 CONFIG_BT_ENABLED=y
+CONFIG_BT_CLASSIC_ENABLED=y
+
+# only support one bluetooth connection
