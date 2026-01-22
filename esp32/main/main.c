@@ -8,7 +8,7 @@
 #include "bt_a2dp.h"
 #include "modulator.h"
 
-const char LOG_TAG[] = "SonicReducer";
+static const char* LOG_TAG = "SonicReducer";
 
 void app_main(void)
 {

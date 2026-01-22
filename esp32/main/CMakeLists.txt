@@ -1,4 +1,11 @@
 idf_component_register(
+    PRIV_REQUIRES
+        nvs_flash
+        bt
+        driver
+        esp_driver_i2s
+        esp_ringbuf
+        esp_driver_dac
     SRCS
         "main.c"
         "bt_a2dp.c"
