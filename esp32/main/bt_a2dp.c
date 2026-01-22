@@ -11,9 +11,7 @@
 static const char *LOG_TAG = "bt-a2dp";
 
 // forward declarations
-static void bt_app_dev_cb(esp_bt_dev_cb_event_t event, esp_bt_dev_cb_param_t *param);
 static void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param);
-static void bt_app_rc_ct_cb(esp_avrc_ct_cb_event_t event, esp_avrc_ct_cb_param_t *param);
 static void bt_app_rc_tg_cb(esp_avrc_tg_cb_event_t event, esp_avrc_tg_cb_param_t *param);
 static void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *param);
 static void bt_app_a2d_audio_data_cb(esp_a2d_conn_hdl_t conn_hdl, esp_a2d_audio_buff_t *audio_buf);
@@ -52,9 +50,7 @@ void bt_a2dp_init(
     ESP_ERROR_CHECK(esp_bt_gap_set_device_name(device_name));
 
     // register callbacks
-    ESP_ERROR_CHECK(esp_bt_dev_register_callback(bt_app_dev_cb));
     ESP_ERROR_CHECK(esp_bt_gap_register_callback(bt_app_gap_cb));
-    ESP_ERROR_CHECK(esp_avrc_ct_register_callback(bt_app_rc_ct_cb));
     ESP_ERROR_CHECK(esp_avrc_ct_init());
     ESP_ERROR_CHECK(esp_avrc_tg_register_callback(bt_app_rc_tg_cb));
     ESP_ERROR_CHECK(esp_avrc_tg_init());
@@ -89,19 +85,69 @@ void bt_a2dp_init(
     ESP_LOGI(LOG_TAG, "initialized");
 }
 
-static void bt_app_dev_cb(esp_bt_dev_cb_event_t event, esp_bt_dev_cb_param_t *param)
-{
-    // TODO implement
-}
-
 static void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param)
 {
-    // TODO implement
-}
+    uint8_t *bda = NULL;
 
-static void bt_app_rc_ct_cb(esp_avrc_ct_cb_event_t event, esp_avrc_ct_cb_param_t *param)
-{
-    // TODO implement
+    switch (event)
+    {
+    /* when authentication completed, this event comes */
+    case ESP_BT_GAP_AUTH_CMPL_EVT:
+    {
+        if (param->auth_cmpl.stat == ESP_BT_STATUS_SUCCESS)
+            ESP_LOGI(LOG_TAG, "authentication success: %s", param->auth_cmpl.device_name);
+        // ESP_LOG_BUFFER_HEX(LOG_TAG, param->auth_cmpl.bda, ESP_BD_ADDR_LEN);
+        else
+            ESP_LOGW(LOG_TAG, "authentication failed, status: %d", param->auth_cmpl.stat);
+        break;
+    }
+    case ESP_BT_GAP_ENC_CHG_EVT:
+    {
+        const char *str_enc[3] = {"OFF", "E0", "AES"};
+        bda = (uint8_t *)param->enc_chg.bda;
+        ESP_LOGI(LOG_TAG, "Encryption mode to [%02x:%02x:%02x:%02x:%02x:%02x] changed to %s",
+                 bda[0], bda[1], bda[2], bda[3], bda[4], bda[5], str_enc[param->enc_chg.enc_mode]);
+        break;
+    }
+
+    /* when Security Simple Pairing user confirmation requested, this event comes */
+    case ESP_BT_GAP_CFM_REQ_EVT:
+        ESP_LOGI(LOG_TAG, "ESP_BT_GAP_CFM_REQ_EVT Please compare the numeric value: %06" PRIu32, param->cfm_req.num_val);
+        esp_bt_gap_ssp_confirm_reply(param->cfm_req.bda, true);
+        break;
+    /* when Security Simple Pairing passkey notified, this event comes */
+    case ESP_BT_GAP_KEY_NOTIF_EVT:
+        ESP_LOGI(LOG_TAG, "ESP_BT_GAP_KEY_NOTIF_EVT passkey: %06" PRIu32, param->key_notif.passkey);
+        break;
+    /* when Security Simple Pairing passkey requested, this event comes */
+    case ESP_BT_GAP_KEY_REQ_EVT:
+        ESP_LOGI(LOG_TAG, "ESP_BT_GAP_KEY_REQ_EVT Please enter passkey!");
+        break;
+
+    /* when GAP mode changed, this event comes */
+    case ESP_BT_GAP_MODE_CHG_EVT:
+        ESP_LOGI(LOG_TAG, "ESP_BT_GAP_MODE_CHG_EVT mode: %d, interval: %.2f ms",
+                 param->mode_chg.mode, param->mode_chg.interval * 0.625);
+        break;
+    /* when ACL connection completed, this event comes */
+    case ESP_BT_GAP_ACL_CONN_CMPL_STAT_EVT:
+        bda = (uint8_t *)param->acl_conn_cmpl_stat.bda;
+        ESP_LOGI(LOG_TAG, "ESP_BT_GAP_ACL_CONN_CMPL_STAT_EVT Connected to [%02x:%02x:%02x:%02x:%02x:%02x], status: 0x%x",
+                 bda[0], bda[1], bda[2], bda[3], bda[4], bda[5], param->acl_conn_cmpl_stat.stat);
+        break;
+    /* when ACL disconnection completed, this event comes */
+    case ESP_BT_GAP_ACL_DISCONN_CMPL_STAT_EVT:
+        bda = (uint8_t *)param->acl_disconn_cmpl_stat.bda;
+        ESP_LOGI(LOG_TAG, "ESP_BT_GAP_ACL_DISC_CMPL_STAT_EVT Disconnected from [%02x:%02x:%02x:%02x:%02x:%02x], reason: 0x%x",
+                 bda[0], bda[1], bda[2], bda[3], bda[4], bda[5], param->acl_disconn_cmpl_stat.reason);
+        break;
+    /* others */
+    default:
+    {
+        ESP_LOGI(LOG_TAG, "event: %d", event);
+        break;
+    }
+    }
 }
 
 static void bt_app_rc_tg_cb(esp_avrc_tg_cb_event_t event, esp_avrc_tg_cb_param_t *param)
@@ -116,5 +162,4 @@ static void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *param)
 
 static void bt_app_a2d_audio_data_cb(esp_a2d_conn_hdl_t conn_hdl, esp_a2d_audio_buff_t *audio_buf)
 {
-
 }
