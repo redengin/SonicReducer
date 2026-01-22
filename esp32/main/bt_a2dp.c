@@ -77,8 +77,10 @@ void bt_a2dp_init(
     ESP_ERROR_CHECK(esp_a2d_sink_register_stream_endpoint(0, &mcc));
     ESP_ERROR_CHECK(esp_a2d_sink_register_audio_data_callback(bt_app_a2d_audio_data_cb));
 
-    // FIXME what do these do?
+    // register for delay reporting
     // ESP_ERROR_CHECK(esp_a2d_sink_get_delay_value());
+
+    // TODO - not sure what this does
     // ESP_ERROR_CHECK(esp_bt_gap_get_device_name());
 
     // set discoverable and connectable mode, wait to be connected
