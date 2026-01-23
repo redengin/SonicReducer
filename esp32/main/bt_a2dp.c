@@ -15,6 +15,11 @@ static void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *pa
 static void bt_app_rc_tg_cb(esp_avrc_tg_cb_event_t event, esp_avrc_tg_cb_param_t *param);
 static void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *param);
 static void bt_app_a2d_audio_data_cb(esp_a2d_conn_hdl_t conn_hdl, esp_a2d_audio_buff_t *audio_buf);
+typedef void (* bt_app_cb_t) (uint16_t event, void *param);
+typedef void (* bt_app_copy_cb_t) (void *p_dest, void *p_src, int len);
+bool bt_app_work_dispatch(bt_app_cb_t p_cback, uint16_t event, void *p_params, int param_len, bt_app_copy_cb_t p_copy_cback);
+static void bt_av_hdl_avrc_tg_evt(uint16_t event, void *p_param);
+
 
 void bt_a2dp_init(
     const char *const device_name, ///< bluetooth published name
@@ -152,7 +157,21 @@ static void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *pa
 
 static void bt_app_rc_tg_cb(esp_avrc_tg_cb_event_t event, esp_avrc_tg_cb_param_t *param)
 {
-    // TODO implement
+    switch (event)
+    {
+    case ESP_AVRC_TG_CONNECTION_STATE_EVT:
+    case ESP_AVRC_TG_REMOTE_FEATURES_EVT:
+    case ESP_AVRC_TG_PASSTHROUGH_CMD_EVT:
+    case ESP_AVRC_TG_SET_ABSOLUTE_VOLUME_CMD_EVT:
+    case ESP_AVRC_TG_REGISTER_NOTIFICATION_EVT:
+    case ESP_AVRC_TG_SET_PLAYER_APP_VALUE_EVT:
+    case ESP_AVRC_TG_PROF_STATE_EVT:
+        bt_app_work_dispatch(bt_av_hdl_avrc_tg_evt, event, param, sizeof(esp_avrc_tg_cb_param_t), NULL);
+        break;
+    default:
+        ESP_LOGE(LOG_TAG, "Invalid AVRC event: %d", event);
+        break;
+    }
 }
 
 static void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *param)
@@ -162,4 +181,77 @@ static void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *param)
 
 static void bt_app_a2d_audio_data_cb(esp_a2d_conn_hdl_t conn_hdl, esp_a2d_audio_buff_t *audio_buf)
 {
+    // TODO implement
+}
+
+bool bt_app_work_dispatch(bt_app_cb_t p_cback, uint16_t event, void *p_params, int param_len, bt_app_copy_cb_t p_copy_cback)
+{
+    // TODO implement
+    return false;
+}
+
+static void bt_av_hdl_avrc_tg_evt(uint16_t event, void *p_param)
+{
+    // ESP_LOGD(LOG_TAG, "%s event: %d", __func__, event);
+
+    // esp_avrc_tg_cb_param_t *rc = (esp_avrc_tg_cb_param_t *)(p_param);
+
+    // switch (event) {
+    // /* when connection state changed, this event comes */
+    // case ESP_AVRC_TG_CONNECTION_STATE_EVT: {
+    //     uint8_t *bda = rc->conn_stat.remote_bda;
+    //     ESP_LOGI(LOG_TAG, "AVRC conn_state evt: state %d, [%02x:%02x:%02x:%02x:%02x:%02x]",
+    //              rc->conn_stat.connected, bda[0], bda[1], bda[2], bda[3], bda[4], bda[5]);
+    //     if (rc->conn_stat.connected) {
+    //         /* create task to simulate volume change */
+    //         xTaskCreate(volume_change_simulation, "vcsTask", 2048, NULL, 5, &s_vcs_task_hdl);
+    //     } else {
+    //         vTaskDelete(s_vcs_task_hdl);
+    //         ESP_LOGI(LOG_TAG, "Stop volume change simulation");
+    //     }
+    //     break;
+    // }
+    // /* when passthrough commanded, this event comes */
+    // case ESP_AVRC_TG_PASSTHROUGH_CMD_EVT: {
+    //     ESP_LOGI(LOG_TAG, "AVRC passthrough cmd: key_code 0x%x, key_state %d", rc->psth_cmd.key_code, rc->psth_cmd.key_state);
+    //     break;
+    // }
+    // /* when absolute volume command from remote device set, this event comes */
+    // case ESP_AVRC_TG_SET_ABSOLUTE_VOLUME_CMD_EVT: {
+    //     ESP_LOGI(LOG_TAG, "AVRC set absolute volume: %d%%", (int)rc->set_abs_vol.volume * 100 / 0x7f);
+    //     volume_set_by_controller(rc->set_abs_vol.volume);
+    //     break;
+    // }
+    // /* when notification registered, this event comes */
+    // case ESP_AVRC_TG_REGISTER_NOTIFICATION_EVT: {
+    //     ESP_LOGI(LOG_TAG, "AVRC register event notification: %d, param: 0x%"PRIx32, rc->reg_ntf.event_id, rc->reg_ntf.event_parameter);
+    //     if (rc->reg_ntf.event_id == ESP_AVRC_RN_VOLUME_CHANGE) {
+    //         s_volume_notify = true;
+    //         esp_avrc_rn_param_t rn_param;
+    //         rn_param.volume = s_volume;
+    //         esp_avrc_tg_send_rn_rsp(ESP_AVRC_RN_VOLUME_CHANGE, ESP_AVRC_RN_RSP_INTERIM, &rn_param);
+    //     }
+    //     break;
+    // }
+    // /* when feature of remote device indicated, this event comes */
+    // case ESP_AVRC_TG_REMOTE_FEATURES_EVT: {
+    //     ESP_LOGI(LOG_TAG, "AVRC remote features: %"PRIx32", CT features: %x", rc->rmt_feats.feat_mask, rc->rmt_feats.ct_feat_flag);
+    //     break;
+    // }
+    // /* when avrcp target init or deinit completed, this event comes */
+    // case ESP_AVRC_TG_PROF_STATE_EVT: {
+    //     if (ESP_AVRC_INIT_SUCCESS == rc->avrc_tg_init_stat.state) {
+    //         ESP_LOGI(LOG_TAG, "AVRCP TG STATE: Init Complete");
+    //     } else if (ESP_AVRC_DEINIT_SUCCESS == rc->avrc_tg_init_stat.state) {
+    //         ESP_LOGI(LOG_TAG, "AVRCP TG STATE: Deinit Complete");
+    //     } else {
+    //         ESP_LOGE(LOG_TAG, "AVRCP TG STATE error: %d", rc->avrc_tg_init_stat.state);
+    //     }
+    //     break;
+    // }
+    // /* others */
+    // default:
+    //     ESP_LOGE(LOG_TAG, "%s unhandled event: %d", __func__, event);
+    //     break;
+    // }
 }
