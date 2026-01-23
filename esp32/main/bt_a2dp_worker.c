@@ -11,7 +11,9 @@ static const char *LOG_TAG = "bt-a2dp-worker";
 
 /// handle of work queue
 static QueueHandle_t s_bt_app_task_queue = NULL;
+static esp_a2d_audio_state_t s_audio_state = ESP_A2D_AUDIO_STATE_STOPPED;
 
+// forwward declarations
 /// signal for `bt_app_work_dispatch`
 #define BT_APP_SIG_WORK_DISPATCH (0x01)
 typedef struct
@@ -182,7 +184,6 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
         a2d = (esp_a2d_cb_param_t *)(p_param);
         const char *s_a2d_audio_state_str[] = {"Suspended", "Started"};
         ESP_LOGI(LOG_TAG, "A2DP audio state: %s", s_a2d_audio_state_str[a2d->audio_stat.state]);
-        static esp_a2d_audio_state_t s_audio_state = ESP_A2D_AUDIO_STATE_STOPPED;
         s_audio_state = a2d->audio_stat.state;
         break;
     }
@@ -324,20 +325,6 @@ static bool bt_app_send_msg(bt_app_msg_t *msg)
         return false;
     }
     return true;
-}
-
-
-
-
-static void bt_app_a2d_data_cb(const uint8_t *data, uint32_t len)
-{
-    write_ringbuf(data, len);
-
-    /* log the number every 100 packets */
-    // if (++s_pkt_cnt % 100 == 0)
-    // {
-    //     ESP_LOGI(LOG_TAG, "Audio packet count: %" PRIu32, s_pkt_cnt);
-    // }
 }
 
 #include <freertos/ringbuf.h>
