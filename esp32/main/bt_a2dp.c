@@ -11,14 +11,17 @@
 static const char *LOG_TAG = "bt-a2dp";
 
 // forward declarations
+// bt event callbacks
 static void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param);
 static void bt_app_rc_tg_cb(esp_avrc_tg_cb_event_t event, esp_avrc_tg_cb_param_t *param);
 static void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *param);
-static void bt_app_a2d_audio_data_cb(esp_a2d_conn_hdl_t conn_hdl, esp_a2d_audio_buff_t *audio_buf);
-typedef void (* bt_app_cb_t) (uint16_t event, void *param);
-typedef void (* bt_app_copy_cb_t) (void *p_dest, void *p_src, int len);
-bool bt_app_work_dispatch(bt_app_cb_t p_cback, uint16_t event, void *p_params, int param_len, bt_app_copy_cb_t p_copy_cback);
+static void bt_app_a2d_data_cb(const uint8_t *data, uint32_t len);
+// bt task handlers
+typedef void (*bt_app_cb_t)(uint16_t event, void *param);
+typedef void (*bt_app_copy_cb_t)(void *p_dest, void *p_src, int len);
+static bool bt_app_work_dispatch(bt_app_cb_t p_cback, uint16_t event, void *p_params, int param_len, bt_app_copy_cb_t p_copy_cback);
 static void bt_av_hdl_avrc_tg_evt(uint16_t event, void *p_param);
+static void bt_av_hdl_a2d_evt(uint16_t event, void *p_param);
 
 
 void bt_a2dp_init(
@@ -65,18 +68,8 @@ void bt_a2dp_init(
     ESP_ERROR_CHECK(esp_a2d_register_callback(&bt_app_a2d_cb));
     ESP_ERROR_CHECK(esp_a2d_sink_init());
 
-    // configure the A2DP support - ESP32 only supports mSBC currently
-    esp_a2d_mcc_t mcc = {0};
-    mcc.type = ESP_A2D_MCT_SBC;
-    mcc.cie.sbc_info.samp_freq = 0xf;
-    mcc.cie.sbc_info.ch_mode = 0xf;
-    mcc.cie.sbc_info.block_len = 0xf;
-    mcc.cie.sbc_info.num_subbands = 0x3;
-    mcc.cie.sbc_info.alloc_mthd = 0x3;
-    mcc.cie.sbc_info.max_bitpool = 250;
-    mcc.cie.sbc_info.min_bitpool = 2;
-    ESP_ERROR_CHECK(esp_a2d_sink_register_stream_endpoint(0, &mcc));
-    ESP_ERROR_CHECK(esp_a2d_sink_register_audio_data_callback(bt_app_a2d_audio_data_cb));
+    // configure the A2DP to use bluedroid codec
+    ESP_ERROR_CHECK(esp_a2d_sink_register_data_callback(bt_app_a2d_data_cb));
 
     // register for delay reporting
     // ESP_ERROR_CHECK(esp_a2d_sink_get_delay_value());
@@ -176,15 +169,40 @@ static void bt_app_rc_tg_cb(esp_avrc_tg_cb_event_t event, esp_avrc_tg_cb_param_t
 
 static void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *param)
 {
-    // TODO implement
+    switch (event)
+    {
+    case ESP_A2D_CONNECTION_STATE_EVT:
+    case ESP_A2D_AUDIO_STATE_EVT:
+    case ESP_A2D_AUDIO_CFG_EVT:
+    case ESP_A2D_PROF_STATE_EVT:
+    case ESP_A2D_SEP_REG_STATE_EVT:
+    case ESP_A2D_SNK_PSC_CFG_EVT:
+    case ESP_A2D_SNK_SET_DELAY_VALUE_EVT:
+    case ESP_A2D_SNK_GET_DELAY_VALUE_EVT:
+    {
+        bt_app_work_dispatch(bt_av_hdl_a2d_evt, event, param, sizeof(esp_a2d_cb_param_t), NULL);
+        break;
+    }
+    default:
+        ESP_LOGE(LOG_TAG, "Invalid A2DP event: %d", event);
+        break;
+    }
 }
 
-static void bt_app_a2d_audio_data_cb(esp_a2d_conn_hdl_t conn_hdl, esp_a2d_audio_buff_t *audio_buf)
+static void bt_app_a2d_data_cb(const uint8_t *data, uint32_t len)
 {
-    // TODO implement
+    // write_ringbuf(data, len);
+
+    // /* log the number every 100 packets */
+    // if (++s_pkt_cnt % 100 == 0) {
+    //     ESP_LOGI(BT_AV_TAG, "Audio packet count: %"PRIu32, s_pkt_cnt);
+    // }
 }
 
-bool bt_app_work_dispatch(bt_app_cb_t p_cback, uint16_t event, void *p_params, int param_len, bt_app_copy_cb_t p_copy_cback)
+
+
+
+static bool bt_app_work_dispatch(bt_app_cb_t p_cback, uint16_t event, void *p_params, int param_len, bt_app_copy_cb_t p_copy_cback)
 {
     // TODO implement
     return false;
