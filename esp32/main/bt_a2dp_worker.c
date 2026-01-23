@@ -30,7 +30,6 @@ static void bt_i2s_task_shut_down(void);
 static void bt_app_task_shut_down(void);
 static void bt_i2s_task_start_up(void);
 
-
 bool bt_app_work_dispatch(bt_app_cb_t p_cback, uint16_t event, void *p_params, int param_len, bt_app_copy_cb_t p_copy_cback)
 {
     ESP_LOGD(LOG_TAG, "%s event: 0x%x, param len: %d", __func__, event, param_len);
@@ -310,23 +309,6 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
     }
 }
 
-
-static bool bt_app_send_msg(bt_app_msg_t *msg)
-{
-    if (msg == NULL)
-    {
-        return false;
-    }
-
-    /* send the message to work queue */
-    if (xQueueSend(s_bt_app_task_queue, msg, 10 / portTICK_PERIOD_MS) != pdTRUE)
-    {
-        ESP_LOGE(LOG_TAG, "%s xQueue send failed", __func__);
-        return false;
-    }
-    return true;
-}
-
 #include <freertos/ringbuf.h>
 #include <freertos/semphr.h>
 enum
@@ -384,10 +366,39 @@ size_t write_ringbuf(const uint8_t *data, size_t size)
     return done ? size : 0;
 }
 
-// task management
-//------------------------------------------------------------------------------
+static bool bt_app_send_msg(bt_app_msg_t *msg)
+{
+    if (msg == NULL)
+    {
+        return false;
+    }
 
-// task handlers
-//------------------------------------------------------------------------------
+    /* send the message to work queue */
+    if (xQueueSend(s_bt_app_task_queue, msg, 10 / portTICK_PERIOD_MS) != pdTRUE)
+    {
+        ESP_LOGE(LOG_TAG, "%s xQueue send failed", __func__);
+        return false;
+    }
+    return true;
+}
 
-
+static void bt_i2s_driver_install(void)
+{
+    // TODO implement
+}
+static void bt_i2s_driver_uninstall(void)
+{
+    // TODO implement
+}
+static void bt_i2s_task_shut_down(void)
+{
+    // TODO implement
+}
+static void bt_app_task_shut_down(void)
+{
+    // TODO implement
+}
+static void bt_i2s_task_start_up(void)
+{
+    // TODO implement
+}
