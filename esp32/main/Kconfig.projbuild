@@ -12,10 +12,10 @@ menu "Sonic Reducer"
             GPIO number to use for modulated output
 
     config SONIC_REDUCER_PIN_CODE
-        string "Pairing password (integers only)"
+        string "Pairing password (numberals only)"
         default "0000"
         help
-            Only the first four integers are used
+            Only four(4) numerals are supported
 
     config SONIC_REDUCER_SSP_ENABLED
         bool "Secure Simple Pairing"
