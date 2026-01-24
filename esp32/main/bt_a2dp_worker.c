@@ -27,7 +27,6 @@ static bool bt_app_send_msg(bt_app_msg_t *msg);
 static void bt_i2s_driver_install(void);
 static void bt_i2s_driver_uninstall(void);
 static void bt_i2s_task_shut_down(void);
-static void bt_app_task_shut_down(void);
 static void bt_i2s_task_start_up(void);
 
 bool bt_app_work_dispatch(bt_app_cb_t p_cback, uint16_t event, void *p_params, int param_len, bt_app_copy_cb_t p_copy_cback)
@@ -382,23 +381,82 @@ static bool bt_app_send_msg(bt_app_msg_t *msg)
     return true;
 }
 
+#include <driver/i2s_std.h>
+static i2s_chan_handle_t tx_chan = NULL;
+#define CONFIG_EXAMPLE_I2S_LRCK_PIN 22
+#define CONFIG_EXAMPLE_I2S_BCK_PIN 26
+#define CONFIG_EXAMPLE_I2S_DATA_PIN 25
 static void bt_i2s_driver_install(void)
 {
-    // TODO implement
+    i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_0, I2S_ROLE_MASTER);
+    chan_cfg.auto_clear = true;
+    i2s_std_config_t std_cfg = {
+        .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(44100),
+        .slot_cfg = I2S_STD_MSB_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_STEREO),
+        .gpio_cfg = {
+            .mclk = I2S_GPIO_UNUSED,
+            .bclk = CONFIG_EXAMPLE_I2S_BCK_PIN,
+            .ws = CONFIG_EXAMPLE_I2S_LRCK_PIN,
+            .dout = CONFIG_EXAMPLE_I2S_DATA_PIN,
+            .din = I2S_GPIO_UNUSED,
+            .invert_flags = {
+                .mclk_inv = false,
+                .bclk_inv = false,
+                .ws_inv = false,
+            },
+        },
+    };
+    /* enable I2S */
+    ESP_ERROR_CHECK(i2s_new_channel(&chan_cfg, &tx_chan, NULL));
+    ESP_ERROR_CHECK(i2s_channel_init_std_mode(tx_chan, &std_cfg));
+    ESP_ERROR_CHECK(i2s_channel_enable(tx_chan));
 }
+
 static void bt_i2s_driver_uninstall(void)
 {
-    // TODO implement
+    ESP_ERROR_CHECK(i2s_channel_disable(tx_chan));
+    ESP_ERROR_CHECK(i2s_del_channel(tx_chan));
 }
-static void bt_i2s_task_shut_down(void)
-{
-    // TODO implement
-}
-static void bt_app_task_shut_down(void)
-{
-    // TODO implement
-}
+
+/// handle of I2S task
+static TaskHandle_t s_bt_i2s_task_handle = NULL;
+static void bt_i2s_task_handler(void *arg);
 static void bt_i2s_task_start_up(void)
 {
-    // TODO implement
+    ESP_LOGI(LOG_TAG, "ringbuffer data empty! mode changed: RINGBUFFER_MODE_PREFETCHING");
+    ringbuffer_mode = RINGBUFFER_MODE_PREFETCHING;
+    if ((s_i2s_write_semaphore = xSemaphoreCreateBinary()) == NULL)
+    {
+        ESP_LOGE(LOG_TAG, "%s, Semaphore create failed", __func__);
+        return;
+    }
+    if ((s_ringbuf_i2s = xRingbufferCreate(RINGBUF_HIGHEST_WATER_LEVEL, RINGBUF_TYPE_BYTEBUF)) == NULL)
+    {
+        ESP_LOGE(LOG_TAG, "%s, ringbuffer create failed", __func__);
+        return;
+    }
+    xTaskCreate(bt_i2s_task_handler, "BtI2STask", 2048, NULL, configMAX_PRIORITIES - 3, &s_bt_i2s_task_handle);
+}
+
+static void bt_i2s_task_shut_down(void)
+{
+    if (s_bt_i2s_task_handle)
+    {
+        vTaskDelete(s_bt_i2s_task_handle);
+        s_bt_i2s_task_handle = NULL;
+    }
+    if (s_ringbuf_i2s)
+    {
+        vRingbufferDelete(s_ringbuf_i2s);
+        s_ringbuf_i2s = NULL;
+    }
+    if (s_i2s_write_semaphore)
+    {
+        vSemaphoreDelete(s_i2s_write_semaphore);
+        s_i2s_write_semaphore = NULL;
+    }
+}
+
+static void bt_i2s_task_handler(void *arg)
+{
 }
