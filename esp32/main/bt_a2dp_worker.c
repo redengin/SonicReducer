@@ -427,11 +427,11 @@ static void bt_i2s_driver_install(void)
         .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(44100),
         .slot_cfg = I2S_STD_MSB_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_STEREO),
         .gpio_cfg = {
-            .mclk = I2S_GPIO_UNUSED,
-            .bclk = CONFIG_EXAMPLE_I2S_BCK_PIN,
-            .ws = CONFIG_EXAMPLE_I2S_LRCK_PIN,
-            .dout = CONFIG_EXAMPLE_I2S_DATA_PIN,
-            .din = I2S_GPIO_UNUSED,
+            .mclk = CONFIG_SONIC_REDUCER_OUTPUT_PIN,
+            // .bclk = CONFIG_EXAMPLE_I2S_BCK_PIN,
+            // .ws = CONFIG_EXAMPLE_I2S_LRCK_PIN,
+            // .dout = CONFIG_EXAMPLE_I2S_DATA_PIN,
+            // .din = I2S_GPIO_UNUSED,
             .invert_flags = {
                 .mclk_inv = false,
                 .bclk_inv = false,
@@ -440,9 +440,10 @@ static void bt_i2s_driver_install(void)
         },
     };
     /* enable I2S */
-    ESP_ERROR_CHECK(i2s_new_channel(&chan_cfg, &tx_chan, NULL));
-    ESP_ERROR_CHECK(i2s_channel_init_std_mode(tx_chan, &std_cfg));
-    ESP_ERROR_CHECK(i2s_channel_enable(tx_chan));
+    // FIXME
+    // ESP_ERROR_CHECK(i2s_new_channel(&chan_cfg, &tx_chan, NULL));
+    // ESP_ERROR_CHECK(i2s_channel_init_std_mode(tx_chan, &std_cfg));
+    // ESP_ERROR_CHECK(i2s_channel_enable(tx_chan));
 }
 
 static void bt_i2s_driver_uninstall(void)

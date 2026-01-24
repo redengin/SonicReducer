@@ -1,3 +1,5 @@
+// inspired by https://github.com/Alexxdal/ESP32FMRadio/
+
 #pragma once
 
 #include <stddef.h>
