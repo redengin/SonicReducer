@@ -50,6 +50,9 @@ void bt_a2dp_init(
     // set the published bluetooth nane
     ESP_ERROR_CHECK(esp_bt_gap_set_device_name(device_name));
 
+    // initialize the worker
+    bt_a2dp_worker_init();
+
     // register callbacks
     ESP_ERROR_CHECK(esp_bt_gap_register_callback(bt_app_gap_cb));
     ESP_ERROR_CHECK(esp_avrc_ct_init());
@@ -69,9 +72,6 @@ void bt_a2dp_init(
 
     // register for GAP client name
     ESP_ERROR_CHECK(esp_bt_gap_get_device_name());
-
-    // initialize the worker
-    bt_a2dp_worker_init();
 
     // set discoverable and connectable mode, wait to be connected
     ESP_ERROR_CHECK(esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_GENERAL_DISCOVERABLE));
