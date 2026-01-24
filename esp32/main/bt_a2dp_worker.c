@@ -10,8 +10,7 @@ static const char *LOG_TAG = "bt-a2dp-worker";
 #include <esp_a2dp_api.h>
 
 /// handle of work queue
-static QueueHandle_t s_bt_app_task_queue = NULL;
-static esp_a2d_audio_state_t s_audio_state = ESP_A2D_AUDIO_STATE_STOPPED;
+static QueueHandle_t s_bt_app_task_queue = NULL;    /// FIXME never inialized
 
 // forwward declarations
 /// signal for `bt_app_work_dispatch`
@@ -24,10 +23,6 @@ typedef struct
     void *param;    /*!< parameter area needs to be last */
 } bt_app_msg_t;
 static bool bt_app_send_msg(bt_app_msg_t *msg);
-static void bt_i2s_driver_install(void);
-static void bt_i2s_driver_uninstall(void);
-static void bt_i2s_task_shut_down(void);
-static void bt_i2s_task_start_up(void);
 
 bool bt_app_work_dispatch(bt_app_cb_t p_cback, uint16_t event, void *p_params, int param_len, bt_app_copy_cb_t p_copy_cback)
 {
@@ -41,10 +36,9 @@ bool bt_app_work_dispatch(bt_app_cb_t p_cback, uint16_t event, void *p_params, i
     msg.cb = p_cback;
 
     if (param_len == 0)
-    {
         return bt_app_send_msg(&msg);
-    }
-    else if (p_params && param_len > 0)
+
+    if (p_params && param_len > 0)
     {
         if ((msg.param = malloc(param_len)) != NULL)
         {
@@ -123,17 +117,11 @@ void bt_av_hdl_avrc_tg_evt(uint16_t event, void *p_param)
     case ESP_AVRC_TG_PROF_STATE_EVT:
     {
         if (ESP_AVRC_INIT_SUCCESS == rc->avrc_tg_init_stat.state)
-        {
             ESP_LOGI(LOG_TAG, "AVRCP TG STATE: Init Complete");
-        }
         else if (ESP_AVRC_DEINIT_SUCCESS == rc->avrc_tg_init_stat.state)
-        {
             ESP_LOGI(LOG_TAG, "AVRCP TG STATE: Deinit Complete");
-        }
         else
-        {
             ESP_LOGE(LOG_TAG, "AVRCP TG STATE error: %d", rc->avrc_tg_init_stat.state);
-        }
         break;
     }
     /* others */
@@ -142,6 +130,13 @@ void bt_av_hdl_avrc_tg_evt(uint16_t event, void *p_param)
         break;
     }
 }
+
+
+// forward declarations
+static void bt_i2s_driver_install(void);
+static void bt_i2s_driver_uninstall(void);
+static void bt_i2s_task_shut_down(void);
+static void bt_i2s_task_start_up(void);
 
 void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
 {
@@ -182,7 +177,14 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
         a2d = (esp_a2d_cb_param_t *)(p_param);
         const char *s_a2d_audio_state_str[] = {"Suspended", "Started"};
         ESP_LOGI(LOG_TAG, "A2DP audio state: %s", s_a2d_audio_state_str[a2d->audio_stat.state]);
-        s_audio_state = a2d->audio_stat.state;
+
+        if (a2d->audio_stat.state)
+            // TODO turn the modulator on
+            ;
+        else
+            // TODO turn the modulator on
+            ;
+
         break;
     }
     /* when audio codec is configured, this event comes */
@@ -357,7 +359,7 @@ size_t write_ringbuf(const uint8_t *data, size_t size)
             ringbuffer_mode = RINGBUFFER_MODE_PROCESSING;
             if (pdFALSE == xSemaphoreGive(s_i2s_write_semaphore))
             {
-                ESP_LOGE(LOG_TAG, "semphore give failed");
+                ESP_LOGE(LOG_TAG, "semaphore give failed");
             }
         }
     }
@@ -365,12 +367,12 @@ size_t write_ringbuf(const uint8_t *data, size_t size)
     return done ? size : 0;
 }
 
+
+
 static bool bt_app_send_msg(bt_app_msg_t *msg)
 {
     if (msg == NULL)
-    {
         return false;
-    }
 
     /* send the message to work queue */
     if (xQueueSend(s_bt_app_task_queue, msg, 10 / portTICK_PERIOD_MS) != pdTRUE)
