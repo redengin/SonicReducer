@@ -1,4 +1,5 @@
 #include "bt_a2dp.h"
+#include "bt_a2dp_worker.h"
 
 #include <esp_log.h>
 #include <esp_bt.h>
@@ -69,6 +70,9 @@ void bt_a2dp_init(
     // register for GAP client name
     ESP_ERROR_CHECK(esp_bt_gap_get_device_name());
 
+    // initialize the worker
+    bt_a2dp_worker_init();
+
     // set discoverable and connectable mode, wait to be connected
     ESP_ERROR_CHECK(esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_GENERAL_DISCOVERABLE));
 
@@ -77,8 +81,6 @@ void bt_a2dp_init(
 
 // bluetooth event callback handlers
 //------------------------------------------------------------------------------
-#include "bt_a2dp_worker.h"
-
 static void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param)
 {
     uint8_t *bda = NULL;

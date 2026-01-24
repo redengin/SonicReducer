@@ -9,12 +9,11 @@ static const char *LOG_TAG = "bt-a2dp-worker";
 #include <esp_avrc_api.h>
 #include <esp_a2dp_api.h>
 
+/// handle of application task
+static TaskHandle_t s_bt_app_task_handle = NULL;
 /// handle of work queue
-static QueueHandle_t s_bt_app_task_queue = NULL;    /// FIXME never inialized
-
-// forwward declarations
-/// signal for `bt_app_work_dispatch`
-#define BT_APP_SIG_WORK_DISPATCH (0x01)
+static QueueHandle_t s_bt_app_task_queue = NULL;
+/// message structure for task queue
 typedef struct
 {
     uint16_t sig;   /*!< signal to bt_app_task */
@@ -22,6 +21,44 @@ typedef struct
     bt_app_cb_t cb; /*!< context switch callback */
     void *param;    /*!< parameter area needs to be last */
 } bt_app_msg_t;
+static void bt_app_task_handler(void *arg);
+void bt_a2dp_worker_init(void)
+{
+    s_bt_app_task_queue = xQueueCreate(10, sizeof(bt_app_msg_t));
+    const BaseType_t pd = xTaskCreate(bt_app_task_handler, "BtAppTask", 3072, NULL, 10, &s_bt_app_task_handle);
+    assert(pd == pdPASS);
+}
+/// signal for `bt_app_work_dispatch`
+#define BT_APP_SIG_WORK_DISPATCH (0x01)
+static void bt_app_task_handler(void *arg)
+{
+    bt_app_msg_t msg;
+
+    for (;;)
+    {
+        /* receive message from work queue and handle it */
+        if (pdTRUE == xQueueReceive(s_bt_app_task_queue, &msg, (TickType_t)portMAX_DELAY))
+        {
+            ESP_LOGD(LOG_TAG, "%s, signal: 0x%x, event: 0x%x", __func__, msg.sig, msg.event);
+
+            switch (msg.sig)
+            {
+            case BT_APP_SIG_WORK_DISPATCH:
+                // call the handler per the message
+                if (msg.cb) msg.cb(msg.event, msg.param);
+                break;
+            default:
+                ESP_LOGW(LOG_TAG, "%s, unhandled signal: %d", __func__, msg.sig);
+                break;
+            }
+
+            if (msg.param)
+                free(msg.param);
+        }
+    }
+}
+
+// forwward declarations
 static bool bt_app_send_msg(bt_app_msg_t *msg);
 
 bool bt_app_work_dispatch(bt_app_cb_t p_cback, uint16_t event, void *p_params, int param_len, bt_app_copy_cb_t p_copy_cback)
@@ -130,7 +167,6 @@ void bt_av_hdl_avrc_tg_evt(uint16_t event, void *p_param)
         break;
     }
 }
-
 
 // forward declarations
 static void bt_i2s_driver_install(void);
@@ -367,8 +403,6 @@ size_t write_ringbuf(const uint8_t *data, size_t size)
     return done ? size : 0;
 }
 
-
-
 static bool bt_app_send_msg(bt_app_msg_t *msg)
 {
     if (msg == NULL)
@@ -471,23 +505,27 @@ static void bt_i2s_task_handler(void *arg)
     const size_t item_size_upto = 240 * 6;
     size_t bytes_written = 0;
 
-    for (;;) {
-        if (pdTRUE == xSemaphoreTake(s_i2s_write_semaphore, portMAX_DELAY)) {
-            for (;;) {
+    for (;;)
+    {
+        if (pdTRUE == xSemaphoreTake(s_i2s_write_semaphore, portMAX_DELAY))
+        {
+            for (;;)
+            {
                 item_size = 0;
                 /* receive data from ringbuffer and write it to I2S DMA transmit buffer */
                 data = (uint8_t *)xRingbufferReceiveUpTo(s_ringbuf_i2s, &item_size, (TickType_t)pdMS_TO_TICKS(20), item_size_upto);
-                if (item_size == 0) {
+                if (item_size == 0)
+                {
                     ESP_LOGI(LOG_TAG, "ringbuffer underflowed! mode changed: RINGBUFFER_MODE_PREFETCHING");
                     ringbuffer_mode = RINGBUFFER_MODE_PREFETCHING;
                     break;
                 }
 
-            #ifdef CONFIG_EXAMPLE_A2DP_SINK_OUTPUT_INTERNAL_DAC
+#ifdef CONFIG_EXAMPLE_A2DP_SINK_OUTPUT_INTERNAL_DAC
                 dac_continuous_write(tx_chan, data, item_size, &bytes_written, -1);
-            #else
+#else
                 i2s_channel_write(tx_chan, data, item_size, &bytes_written, portMAX_DELAY);
-            #endif
+#endif
                 vRingbufferReturnItem(s_ringbuf_i2s, (void *)data);
             }
         }

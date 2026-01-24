@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+void bt_a2dp_worker_init(void);
+
 typedef void (*bt_app_cb_t)(uint16_t event, void *param);
 typedef void (*bt_app_copy_cb_t)(void *p_dest, void *p_src, int len);
 bool bt_app_work_dispatch(bt_app_cb_t p_cback, uint16_t event, void *p_params, int param_len, bt_app_copy_cb_t p_copy_cback);
