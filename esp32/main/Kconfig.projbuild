@@ -1,0 +1,26 @@
+menu "Sonic Reducer"
+    config SONIC_REDUCER_DEVICE_NAME
+        string "Published bluetooth name"
+        default "Sonic Reducer"
+        help
+            Use this option to set local device name.
+
+    config SONIC_REDUCER_OUTPUT_PIN
+        int "40 KHz modulated audio output (GPIO pin)"
+        default 22
+        help
+            GPIO number to use for modulated output
+
+    config SONIC_REDUCER_PIN_CODE
+        string "Pairing password (integers only)"
+        default "0000"
+
+    config SONIC_REDUCER_SSP_ENABLED
+        bool "Secure Simple Pairing"
+        depends on BT_CLASSIC_ENABLED
+        default y
+        help
+            This enables the Secure Simple Pairing. If disable this option,
+            Bluedroid will only support Legacy Pairing
+
+endmenu
