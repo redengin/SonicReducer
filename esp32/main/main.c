@@ -8,7 +8,12 @@
 #include "bt_a2dp.h"
 #include "modulator.h"
 
-static const char* LOG_TAG = "SonicReducer";
+static const char *LOG_TAG = "SonicReducer";
+
+/// retrieve the pin code from the sdkconfig
+static esp_err_t pin_code_from_sdkconfig(
+    pin_code_t*   ///< [OUT]
+);
 
 void app_main(void)
 {
@@ -26,23 +31,44 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_BLE));
 
     // initialize bluetooth audio receiver
-    // FIXME use esp32 autoconf to configure device name and pin code
-    const char device_name[] = "SonicReducer";
-    const pin_code_t pin_code = {0, 0, 0, 0};
-    bt_a2dp_init(device_name, pin_code);
+    pin_code_t pin_code;
+    ESP_ERROR_CHECK(pin_code_from_sdkconfig(&pin_code));
+    bt_a2dp_init(CONFIG_SONIC_REDUCER_DEVICE_NAME, pin_code);
 
-    // initialize the modulator
-    modulator_init();
-
-    // TEST USE ONLY
-    // const modulator_config_t mod_config = {
-    //     .pcm_sample_rate_hz = 8000,
-    //     .bits_per_sample = 8,
-    // };
-    // modulator_config(&mod_config);
-    // modulator_start();
-    // modulator_stop();
+    ESP_LOGI(LOG_TAG, "Initialized bluetooth speaker [%s] with pin [%s]",
+        CONFIG_SONIC_REDUCER_DEVICE_NAME,
+        CONFIG_SONIC_REDUCER_PIN_CODE
+    );
 
     while (true)
         vTaskDelay(pdMS_TO_TICKS(1000));
+}
+
+static esp_err_t pin_code_from_sdkconfig(pin_code_t *pin_code)
+{
+    const size_t pin_code_str_len = strlen(CONFIG_SONIC_REDUCER_PIN_CODE);
+    if (pin_code_str_len != PIN_CODE_LENGTH)
+    {
+        ESP_LOGE(LOG_TAG, "invalid pin code length (%d required, found %d) [%s]",
+            PIN_CODE_LENGTH,
+            pin_code_str_len,
+            CONFIG_SONIC_REDUCER_PIN_CODE);
+        return ESP_FAIL;
+    }
+
+    // translate the string into integers
+    for (int i = 0; i < PIN_CODE_LENGTH; ++i)
+    {
+        // const uint8_t digit = pin_code_str[i] - '0';
+        const uint8_t digit = CONFIG_SONIC_REDUCER_PIN_CODE[i] - '0';
+        assert(digit <= 9);
+        if (digit > 9)
+        {
+            ESP_LOGE(LOG_TAG, "invalid pin code [%s]", CONFIG_SONIC_REDUCER_PIN_CODE);
+            return ESP_FAIL;
+        }
+        *pin_code[i] = digit;
+    }
+
+    return ESP_OK;
 }

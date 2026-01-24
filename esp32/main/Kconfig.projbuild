@@ -14,6 +14,8 @@ menu "Sonic Reducer"
     config SONIC_REDUCER_PIN_CODE
         string "Pairing password (integers only)"
         default "0000"
+        help
+            Only the first four integers are used
 
     config SONIC_REDUCER_SSP_ENABLED
         bool "Secure Simple Pairing"

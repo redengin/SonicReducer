@@ -42,9 +42,9 @@ void bt_a2dp_init(
         ESP_ERROR_CHECK(esp_bt_gap_set_security_param(
             param_type, &iocap, sizeof(uint8_t)));
         esp_bt_pin_code_t _pin_code;
-        memcpy(_pin_code, pin_code, SIZEOF_PIN_CODE);
+        memcpy(_pin_code, pin_code, sizeof(pin_code_t));
         ESP_ERROR_CHECK(esp_bt_gap_set_pin(
-            ESP_BT_PIN_TYPE_FIXED, SIZEOF_PIN_CODE, _pin_code));
+            ESP_BT_PIN_TYPE_FIXED, sizeof(pin_code_t), _pin_code));
     }
 
     // set the published bluetooth nane
