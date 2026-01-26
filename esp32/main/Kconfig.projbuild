@@ -5,12 +5,27 @@ menu "Sonic Reducer"
         help
             Use this option to set local device name.
 
-    config SONIC_REDUCER_OUTPUT_PIN
-        int "40 KHz modulated audio output (GPIO pin)"
-        range 0 3
-        default 1
+    # config SONIC_REDUCER_OUTPUT_PIN
+    choice
+        prompt "Select output pin - 40 KHz modulated audio"
+        default SONIC_REDUCER_OUT_1
         help
             ESP only supports GPIO pins [0, 1, 3] for I2S mclk output
+
+        config SONIC_REDUCER_OUT_0
+            bool "GPIO 0"
+
+        config SONIC_REDUCER_OUT_1
+            bool "GPIO 1"
+
+        config SONIC_REDUCER_OUT_3
+            bool "GPIO 3"
+    endchoice
+    config SONIC_REDUCER_OUTPUT_PIN
+        int
+        default 0 if SONIC_REDUCER_OUT_0
+        default 1 if SONIC_REDUCER_OUT_1
+        default 3 if SONIC_REDUCER_OUT_3
 
     config SONIC_REDUCER_PIN_CODE
         string "Pairing password (numberals only)"

@@ -6,7 +6,6 @@
 #include <esp_bt.h>
 
 #include "bt_a2dp.h"
-#include "modulator.h"
 
 static const char *LOG_TAG = "SonicReducer";
 

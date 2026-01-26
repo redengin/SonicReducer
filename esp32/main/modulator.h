@@ -11,7 +11,7 @@ void modulator_init(void);
 
 typedef struct {
     uint32_t pcm_sample_rate_hz;
-    size_t bits_per_sample; // 8, 16, 24, 32
+    size_t ch_count;    // number of channels [1, 2]
 } modulator_config_t;
 
 /// configure the modulator

@@ -179,6 +179,7 @@ void bt_av_hdl_avrc_tg_evt(uint16_t event, void *p_param)
     }
 }
 
+#include "modulator.h"
 // forward declarations
 static void bt_i2s_driver_install(void);
 static void bt_i2s_driver_uninstall(void);
@@ -225,12 +226,12 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
         const char *s_a2d_audio_state_str[] = {"Suspended", "Started"};
         ESP_LOGI(LOG_TAG, "A2DP audio state: %s", s_a2d_audio_state_str[a2d->audio_stat.state]);
 
-        if (a2d->audio_stat.state)
-            // TODO turn the modulator on
-            ;
+        if (a2d->audio_stat.state == ESP_A2D_AUDIO_STATE_STARTED)
+            // start the modulator
+            modulator_start();
         else
-            // TODO turn the modulator on
-            ;
+            // stop the modulator
+            modulator_stop();
 
         break;
     }
@@ -263,7 +264,13 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
                 ch_count = 1;
             }
 
-            // FIXME configure I2S output
+            // configure I2S output
+            // FIXME
+            // const modulator_config_t config = {
+            //     .pcm_sample_rate_hz = sample_rate,
+            //     .ch_count = ch_count,
+            // };
+            // modulator_config(&config);
             // i2s_channel_disable(tx_chan);
             // i2s_std_clk_config_t clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(sample_rate);
             // i2s_std_slot_config_t slot_cfg = I2S_STD_MSB_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, ch_count);
