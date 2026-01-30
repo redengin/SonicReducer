@@ -6,9 +6,8 @@ People are interested in open-source/hardware creation of parametric speakers.
 Sonic Reducer
 ================================================================================
 This project provides
-* parametric speaker design
-    * amplifier guidance
-* embedded rust to generate the signal (a 40 KHz carrier wave)
+* [parametric speaker system design](docs/hardware.md)
+* embedded rust to generate the modulate the audio signal
 * Bluetooth support
-    * Use device as Bluetooth speaker - send audio to be translated to 40 KHz carrier wave
+    * Use device as Bluetooth speaker
 

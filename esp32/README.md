@@ -22,3 +22,4 @@ idf.py flash
 idf.py flash monitor
 ```
 
+<!-- NOTE to self checkout https://github.com/ok-home/logic_analyzer -->

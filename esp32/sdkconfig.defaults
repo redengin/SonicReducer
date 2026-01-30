@@ -9,4 +9,5 @@ CONFIG_BT_A2DP_ENABLE=y
 CONFIG_BT_AVRCP_CT_COVER_ART_ENABLED=y
 CONFIG_DAC_DMA_AUTO_16BIT_ALIGN=n
 
-# only support one bluetooth connection
+# ignore use of depracated I2S API
+# CONFIG_I2S_SUPPRESS_DEPRECATE_WARN = n
