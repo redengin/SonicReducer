@@ -46,25 +46,26 @@ void bt_a2dp_init(
     // initialize the a2dp worker
     bt_a2dp_worker_init();
 
-    // register callbacks
+    // register GAP connection callbacks
     ESP_ERROR_CHECK(esp_bt_gap_register_callback(bt_app_gap_cb));
-    ESP_ERROR_CHECK(esp_avrc_ct_init());
-    ESP_ERROR_CHECK(esp_avrc_tg_register_callback(bt_app_rc_tg_cb));
-    ESP_ERROR_CHECK(esp_avrc_tg_init());
-    esp_avrc_rn_evt_cap_mask_t evt_set = {0};
-    assert(esp_avrc_rn_evt_bit_mask_operation(ESP_AVRC_BIT_MASK_OP_SET, &evt_set, ESP_AVRC_RN_VOLUME_CHANGE));
-    ESP_ERROR_CHECK(esp_avrc_tg_set_rn_evt_cap(&evt_set));
-    ESP_ERROR_CHECK(esp_a2d_register_callback(&bt_app_a2d_cb));
-    ESP_ERROR_CHECK(esp_a2d_sink_register_data_callback(bt_app_a2d_data_cb));
-
-    // configure the A2DP to use bluedroid codec (SBC -> PCM)
-    ESP_ERROR_CHECK(esp_a2d_sink_init());
-
-    // register for A2DP delay support
-    ESP_ERROR_CHECK(esp_a2d_sink_get_delay_value());
-
     // register for GAP client name
     ESP_ERROR_CHECK(esp_bt_gap_get_device_name());
+
+    // intialize AVRC and register callbacks
+    // ESP_ERROR_CHECK(esp_avrc_ct_init());
+    // ESP_ERROR_CHECK(esp_avrc_tg_register_callback(bt_app_rc_tg_cb));
+    // ESP_ERROR_CHECK(esp_avrc_tg_init());
+    // esp_avrc_rn_evt_cap_mask_t evt_set = {0};
+    // assert(esp_avrc_rn_evt_bit_mask_operation(ESP_AVRC_BIT_MASK_OP_SET, &evt_set, ESP_AVRC_RN_VOLUME_CHANGE));
+    // ESP_ERROR_CHECK(esp_avrc_tg_set_rn_evt_cap(&evt_set));
+
+    // initialize A2DP and regsiter callbacks
+    // configure the A2DP to use bluedroid codec (SBC -> PCM)
+    ESP_ERROR_CHECK(esp_a2d_sink_init());
+    ESP_ERROR_CHECK(esp_a2d_register_callback(&bt_app_a2d_cb));
+    ESP_ERROR_CHECK(esp_a2d_sink_register_data_callback(bt_app_a2d_data_cb));
+    // register for A2DP delay support
+    ESP_ERROR_CHECK(esp_a2d_sink_get_delay_value());
 
     // set discoverable and connectable mode, wait to be connected
     ESP_ERROR_CHECK(esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_GENERAL_DISCOVERABLE));
@@ -97,7 +98,7 @@ static void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *pa
     /* others */
     default:
     {
-        ESP_LOGD(LOG_TAG, "Ignored event: %d", event);
+        ESP_LOGD(LOG_TAG, "Ignored ESP_BT_GAP event: %d", event);
         break;
     }
     }
