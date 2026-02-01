@@ -48,8 +48,8 @@ void bt_a2dp_init(
 
     // initialize A2DP and regsiter callbacks
     ESP_ERROR_CHECK(esp_a2d_sink_init());
-    ESP_ERROR_CHECK(esp_a2d_register_callback(&bt_app_a2d_cb));
     ESP_ERROR_CHECK(esp_a2d_sink_register_data_callback(bt_app_a2d_data_cb));
+    ESP_ERROR_CHECK(esp_a2d_register_callback(&bt_app_a2d_cb));
     // register for A2DP delay support
     ESP_ERROR_CHECK(esp_a2d_sink_get_delay_value());
 
@@ -101,24 +101,27 @@ static void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *a2d)
         ESP_LOGI(LOG_TAG, "A2DP connection state: %s, [%02x:%02x:%02x:%02x:%02x:%02x]",
                  s_a2d_conn_state_str[a2d->conn_stat.state],
                  bda[0], bda[1], bda[2], bda[3], bda[4], bda[5]);
-        if (a2d->conn_stat.state == ESP_A2D_CONNECTION_STATE_DISCONNECTED)
+
+        switch (a2d->conn_stat.state)
+        {
+        case ESP_A2D_CONNECTION_STATE_DISCONNECTED:
         {
             // shutdown audio
             modulator_stop();
 
             // make the speaker discoverable
             esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_GENERAL_DISCOVERABLE);
+            break;
         }
-        else if (a2d->conn_stat.state == ESP_A2D_CONNECTION_STATE_CONNECTED)
+        case ESP_A2D_CONNECTION_STATE_CONNECTED:
         {
             // ignore connection attempts
             esp_bt_gap_set_scan_mode(ESP_BT_NON_CONNECTABLE, ESP_BT_NON_DISCOVERABLE);
-            // bt_i2s_task_start_up();
+            break;
         }
-        else if (a2d->conn_stat.state == ESP_A2D_CONNECTION_STATE_CONNECTING)
-        {
-            // bt_i2s_driver_install();
-        }
+        default:
+            ESP_LOGD(LOG_TAG, "ignonred ESP_A2D_CONNECTION_STATE_EVT [%d]", event);
+        };
         break;
     }
     /* when audio codec is configured, this event comes */
@@ -143,7 +146,7 @@ static void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *a2d)
             if (p_mcc->cie.sbc_info.ch_mode & ESP_A2D_SBC_CIE_CH_MODE_MONO)
                 ch_count = 1;
 
-            ESP_LOGD(LOG_TAG,
+            ESP_LOGI(LOG_TAG,
                      "Audio player config, sample rate: %d, channels: %d,",
                      sample_rate, ch_count);
             // ESP_LOGD(LOG_TAG,
@@ -156,8 +159,7 @@ static void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *a2d)
             //         );
 
             // TODO configure modulator
-            const modulator_config_t config = {
-            };
+            const modulator_config_t config = {};
             modulator_config(&config);
             break;
         }
@@ -201,5 +203,6 @@ static void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *a2d)
 /// send the PCM data to the modulator
 static void bt_app_a2d_data_cb(const uint8_t *data, uint32_t len)
 {
+    ESP_LOGD(LOG_TAG, "a2dp data sz:%d", len);
     modulator_write(data, len);
 }
