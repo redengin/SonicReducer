@@ -6,7 +6,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-/// route GPIO_NUM_0 for modulator ouptut
 void modulator_init(void);
 
 typedef struct {
@@ -17,9 +16,12 @@ typedef struct {
 /// configure the modulator
 void modulator_config(const modulator_config_t* const);
 
-/// start the modulator
+/// start the ouptput
 void modulator_start(void);
 
-/// start the modulator
+/// send pcm data to the modulator
+void modulator_write(const uint8_t* const data, const size_t sz);
+
+/// stop the output
 void modulator_stop(void);
 

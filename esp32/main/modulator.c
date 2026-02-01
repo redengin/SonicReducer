@@ -62,6 +62,12 @@ void modulator_start(void)
     /// FIXME implement
 }
 
+void modulator_write(const uint8_t* const data, const size_t sz)
+{
+    // FIXME implement
+}
+
+
 void modulator_stop(void)
 {
     /// FIXME implement
