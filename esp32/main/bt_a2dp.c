@@ -1,5 +1,4 @@
 #include "bt_a2dp.h"
-#include "bt_a2dp_worker.h"
 
 #include <esp_log.h>
 #include <esp_bt.h>
@@ -13,7 +12,6 @@ static const char *LOG_TAG = "bt-a2dp";
 
 // forward declarations of bluetooth event callbacks
 static void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param);
-// static void bt_app_rc_tg_cb(esp_avrc_tg_cb_event_t event, esp_avrc_tg_cb_param_t *param);
 static void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *param);
 static void bt_app_a2d_data_cb(const uint8_t *data, uint32_t len);
 
@@ -43,21 +41,10 @@ void bt_a2dp_init(
     // set the published bluetooth nane
     ESP_ERROR_CHECK(esp_bt_gap_set_device_name(device_name));
 
-    // initialize the a2dp worker
-    bt_a2dp_worker_init();
-
     // register GAP connection callbacks
     ESP_ERROR_CHECK(esp_bt_gap_register_callback(bt_app_gap_cb));
     // register for GAP client name
     ESP_ERROR_CHECK(esp_bt_gap_get_device_name());
-
-    // intialize AVRC and register callbacks
-    // ESP_ERROR_CHECK(esp_avrc_ct_init());
-    // ESP_ERROR_CHECK(esp_avrc_tg_register_callback(bt_app_rc_tg_cb));
-    // ESP_ERROR_CHECK(esp_avrc_tg_init());
-    // esp_avrc_rn_evt_cap_mask_t evt_set = {0};
-    // assert(esp_avrc_rn_evt_bit_mask_operation(ESP_AVRC_BIT_MASK_OP_SET, &evt_set, ESP_AVRC_RN_VOLUME_CHANGE));
-    // ESP_ERROR_CHECK(esp_avrc_tg_set_rn_evt_cap(&evt_set));
 
     // initialize A2DP and regsiter callbacks
     ESP_ERROR_CHECK(esp_a2d_sink_init());
@@ -100,47 +87,6 @@ static void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *pa
     }
     }
 }
-
-// static void bt_app_rc_tg_cb(esp_avrc_tg_cb_event_t event, esp_avrc_tg_cb_param_t *param)
-// {
-//     switch (event)
-//     {
-//     case ESP_AVRC_TG_CONNECTION_STATE_EVT:
-//     case ESP_AVRC_TG_REMOTE_FEATURES_EVT:
-//     case ESP_AVRC_TG_PASSTHROUGH_CMD_EVT:
-//     case ESP_AVRC_TG_SET_ABSOLUTE_VOLUME_CMD_EVT:
-//     case ESP_AVRC_TG_REGISTER_NOTIFICATION_EVT:
-//     case ESP_AVRC_TG_SET_PLAYER_APP_VALUE_EVT:
-//     case ESP_AVRC_TG_PROF_STATE_EVT:
-//         bt_app_work_dispatch(bt_av_hdl_avrc_tg_evt, event, param, sizeof(esp_avrc_tg_cb_param_t), NULL);
-//         break;
-//     default:
-//         ESP_LOGE(LOG_TAG, "Invalid AVRC event: %d", event);
-//         break;
-//     }
-// }
-
-// static void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *param)
-// {
-//     switch (event)
-//     {
-//     case ESP_A2D_CONNECTION_STATE_EVT:
-//     case ESP_A2D_AUDIO_STATE_EVT:
-//     case ESP_A2D_AUDIO_CFG_EVT:
-//     case ESP_A2D_PROF_STATE_EVT:
-//     case ESP_A2D_SEP_REG_STATE_EVT:
-//     case ESP_A2D_SNK_PSC_CFG_EVT:
-//     case ESP_A2D_SNK_SET_DELAY_VALUE_EVT:
-//     case ESP_A2D_SNK_GET_DELAY_VALUE_EVT:
-//     {
-//         bt_app_work_dispatch(bt_av_hdl_a2d_evt, event, param, sizeof(esp_a2d_cb_param_t), NULL);
-//         break;
-//     }
-//     default:
-//         ESP_LOGE(LOG_TAG, "Invalid A2DP event: %d", event);
-//         break;
-//     }
-// }
 
 #include "modulator.h"
 static void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *a2d)
@@ -216,6 +162,7 @@ static void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *a2d)
             ESP_LOGW(LOG_TAG, "Unacceptable A2DP codec [%d]", p_mcc->type);
             break;
         }
+        break;
     }
     /* when audio stream transmission state changed, this event comes */
     case ESP_A2D_AUDIO_STATE_EVT:
