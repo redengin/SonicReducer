@@ -32,6 +32,8 @@ The esp-idf provides Legacy Bluetooth [A2DP] via the bluedroid stack.
 [SBC] -> [PCM] decoding.
 
 
+
+
 <!-- footnotes -->
 [A2DP]:https://en.wikipedia.org/wiki/List_of_Bluetooth_profiles#Advanced_Audio_Distribution_Profile_(A2DP)
 

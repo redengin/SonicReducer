@@ -30,9 +30,9 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_BLE));
 
     // initialize bluetooth audio receiver
-    pin_code_t pin_code;
-    ESP_ERROR_CHECK(pin_code_from_sdkconfig(&pin_code));
-    bt_a2dp_init(CONFIG_SONIC_REDUCER_DEVICE_NAME, pin_code);
+    // pin_code_t pin_code;
+    // ESP_ERROR_CHECK(pin_code_from_sdkconfig(&pin_code));
+    bt_a2dp_init(CONFIG_SONIC_REDUCER_DEVICE_NAME, CONFIG_SONIC_REDUCER_PIN_CODE);
 
     ESP_LOGI(LOG_TAG, "Initialized bluetooth speaker [%s] with pin [%s]",
         CONFIG_SONIC_REDUCER_DEVICE_NAME,
