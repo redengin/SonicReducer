@@ -156,6 +156,9 @@ static void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *a2d)
             //         );
 
             // TODO configure modulator
+            const modulator_config_t config = {
+            };
+            modulator_config(&config);
             break;
         }
         default:
