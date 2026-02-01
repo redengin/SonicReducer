@@ -13,7 +13,7 @@ static const char *LOG_TAG = "bt-a2dp";
 
 // forward declarations of bluetooth event callbacks
 static void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param);
-static void bt_app_rc_tg_cb(esp_avrc_tg_cb_event_t event, esp_avrc_tg_cb_param_t *param);
+// static void bt_app_rc_tg_cb(esp_avrc_tg_cb_event_t event, esp_avrc_tg_cb_param_t *param);
 static void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *param);
 static void bt_app_a2d_data_cb(const uint8_t *data, uint32_t len);
 
@@ -60,7 +60,6 @@ void bt_a2dp_init(
     // ESP_ERROR_CHECK(esp_avrc_tg_set_rn_evt_cap(&evt_set));
 
     // initialize A2DP and regsiter callbacks
-    // configure the A2DP to use bluedroid codec (SBC -> PCM)
     ESP_ERROR_CHECK(esp_a2d_sink_init());
     ESP_ERROR_CHECK(esp_a2d_register_callback(&bt_app_a2d_cb));
     ESP_ERROR_CHECK(esp_a2d_sink_register_data_callback(bt_app_a2d_data_cb));
@@ -77,8 +76,6 @@ void bt_a2dp_init(
 //------------------------------------------------------------------------------
 static void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param)
 {
-    uint8_t *bda = NULL;
-
     switch (event)
     {
     /* when authentication completed, this event comes */
@@ -104,24 +101,24 @@ static void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *pa
     }
 }
 
-static void bt_app_rc_tg_cb(esp_avrc_tg_cb_event_t event, esp_avrc_tg_cb_param_t *param)
-{
-    switch (event)
-    {
-    case ESP_AVRC_TG_CONNECTION_STATE_EVT:
-    case ESP_AVRC_TG_REMOTE_FEATURES_EVT:
-    case ESP_AVRC_TG_PASSTHROUGH_CMD_EVT:
-    case ESP_AVRC_TG_SET_ABSOLUTE_VOLUME_CMD_EVT:
-    case ESP_AVRC_TG_REGISTER_NOTIFICATION_EVT:
-    case ESP_AVRC_TG_SET_PLAYER_APP_VALUE_EVT:
-    case ESP_AVRC_TG_PROF_STATE_EVT:
-        bt_app_work_dispatch(bt_av_hdl_avrc_tg_evt, event, param, sizeof(esp_avrc_tg_cb_param_t), NULL);
-        break;
-    default:
-        ESP_LOGE(LOG_TAG, "Invalid AVRC event: %d", event);
-        break;
-    }
-}
+// static void bt_app_rc_tg_cb(esp_avrc_tg_cb_event_t event, esp_avrc_tg_cb_param_t *param)
+// {
+//     switch (event)
+//     {
+//     case ESP_AVRC_TG_CONNECTION_STATE_EVT:
+//     case ESP_AVRC_TG_REMOTE_FEATURES_EVT:
+//     case ESP_AVRC_TG_PASSTHROUGH_CMD_EVT:
+//     case ESP_AVRC_TG_SET_ABSOLUTE_VOLUME_CMD_EVT:
+//     case ESP_AVRC_TG_REGISTER_NOTIFICATION_EVT:
+//     case ESP_AVRC_TG_SET_PLAYER_APP_VALUE_EVT:
+//     case ESP_AVRC_TG_PROF_STATE_EVT:
+//         bt_app_work_dispatch(bt_av_hdl_avrc_tg_evt, event, param, sizeof(esp_avrc_tg_cb_param_t), NULL);
+//         break;
+//     default:
+//         ESP_LOGE(LOG_TAG, "Invalid AVRC event: %d", event);
+//         break;
+//     }
+// }
 
 static void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *param)
 {
