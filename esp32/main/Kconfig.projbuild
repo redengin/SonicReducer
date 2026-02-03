@@ -60,7 +60,4 @@ menu "Sonic Reducer"
     #             bool "GPIO 26"
     #     endchoice
     # endmenu
-
-    # ESP only supports GPIO pins [0, 1, 3] for I2S mclk output
-
 endmenu

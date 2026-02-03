@@ -1,45 +1,45 @@
 Parametric Speaker System
 ================================================================================
+`Speakers` are ultrasound transmitters designed to transmit at 40 KHz (`carrier frequency`).
 
-<!-- Amplifier Based Design
+`Speaker` loudness is voltage dependent - the more voltage the louder the speaker.
+To send the modulated signal to a speaker, you'll need voltage amplification.
+
+Amplification
 ================================================================================
+
+Amplifier Based Design
+--------------------------------------------------------------------------------
 ```mermaid
----
-title: Hardware Functional Overview (Amplifier)
----
 flowchart LR
     Audio["Modulated Audio"]    .->     DAC
     DAC                         .->     Amplifier
     Amplifier                   .->     Speakers
 
 ```
-`Speakers` are ultrasound transmitters designed to transmit at 40 KHz (`carrier frequency`).
 
 `Amplifiers` drive the speakers at a higher voltage (to increase loudness) per the analog
 voltage input.
 
-The `DAC` produces the voltages to drive analog voltage per the `Modulated Audio`. -->
+The `DAC` produces the voltages to drive analog voltage per the `Modulated Audio`.
 
-Rectifier Based Design
-================================================================================
-```mermaid
----
-title: Hardware Functional Overview (Rectifier)
----
-flowchart LR
-    Audio["Modulated Audio"]    .->     |PWM|Rectifier
-    Rectifier                   .->     Speakers
-```
-`Speakers` are ultrasound transmitters designed to transmit at 40 KHz (`carrier frequency`).
-
-The `Rectifier` drives the speakers at a higher voltage (to increase loudness).
-`Rectifiers` are binary (on/off). The `Rectifier` input is a Pulse Width Modulation (`PWM`) signal operating at the `carrier frequency`.
-
-Rectifier Guidance
+H-Bridge Based Design
 --------------------------------------------------------------------------------
-Not all rectifiers are designed to operate at ultrasound frequencies.
+```mermaid
+flowchart LR
+    Audio["Modulated Audio"]    .->     H-Bridge
+    H-Bridge                    .->     Speakers
+```
 
-Make sure to choose a rectifier that is designed to operate at 40 KHz.
+The `H-Bridge` drives the speakers at a higher voltage (to increase loudness)
+per two logic inputs (IN1, IN2) - driving the speaker at a VS(output voltage level)
+polarity.
+
+| IN1   | IN2   | Output to Speaker |
+|-------|-------|-------------------|
+| true  | false | (+) Positive      |
+| false | true  | (-) Negative      |
+| IN2   | IN1   | (ground) 0        |
 
 Example Bill of Materials (BOM)
 ================================================================================

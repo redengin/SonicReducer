@@ -29,10 +29,25 @@ How it works
 The esp-idf provides Legacy Bluetooth [A2DP] via the bluedroid stack. 
 
 [A2DP] transfers sound using [SBC] encoding. The bluedroid stack provides
-[SBC] -> [PCM] decoding.
+[SBC] -> [PCM] decoding, creating 16bit PCM at the A2DP sample rate.
 
+Modulator
+--------------------------------------------------------------------------------
+This implementation supports using an H-bridge or an amplifier
 
-To drive the LN298N
+### H-bridge Modulation
+H-bridge must be driven by two logic inputs (IN1, IN2).
+| IN1   | IN2   | DC Output Polarity |
+|-------|-------|--------------------|
+| true  | false | (+) Positive       |
+| false | true  | (-) Negative       |
+
+When IN1 == IN2 DC Output is ground (0V).
+
+### Amplifier
+The ESP32 DAC output is 0.08 V - 3.16 V. As these are only positive voltages,
+the amplifier must be designed to these levels, or additional circuitry used
+to convert the DAC output to the amplifier input.
 
 <!-- footnotes -->
 [A2DP]:https://en.wikipedia.org/wiki/List_of_Bluetooth_profiles#Advanced_Audio_Distribution_Profile_(A2DP)
