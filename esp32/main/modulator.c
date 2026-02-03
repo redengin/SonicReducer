@@ -12,7 +12,7 @@
 #define I2S_BUFFER_LEN (1024)
 static uint8_t I2S_BUFFER[I2S_BUFFER_LEN];
 
-void modulator_init(void)
+void modulator_create(void)
 {
     // configure I2S driver
     static const i2s_config_t i2s_config = {
@@ -51,6 +51,11 @@ void modulator_init(void)
     SET_PERI_REG_BITS(I2S_CLKM_CONF_REG(I2S), I2S_CLKM_DIV_B_V, 1, I2S_CLKM_DIV_B_S);
     SET_PERI_REG_BITS(I2S_CLKM_CONF_REG(I2S), I2S_CLKM_DIV_NUM_V, 2, I2S_CLKM_DIV_NUM_S);
     SET_PERI_REG_BITS(I2S_SAMPLE_RATE_CONF_REG(I2S), I2S_TX_BCK_DIV_NUM_V, 2, I2S_TX_BCK_DIV_NUM_S);
+}
+
+void modulator_destroy(void)
+{
+
 }
 
 void modulator_config(const modulator_config_t *const config)

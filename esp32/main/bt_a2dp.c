@@ -48,7 +48,16 @@ void bt_a2dp_init(
 
     // initialize A2DP and regsiter callbacks
     ESP_ERROR_CHECK(esp_a2d_sink_init());
-    ESP_ERROR_CHECK(esp_a2d_sink_register_data_callback(bt_app_a2d_data_cb));
+    // deprecated
+    // ESP_ERROR_CHECK(esp_a2d_sink_register_data_callback(bt_app_a2d_data_cb));
+    esp_a2d_mcc_t mcc = {0};
+    mcc.cie.sbc_info.ch_mode = ESP_A2D_SBC_CIE_CH_MODE_MONO;
+    mcc.cie.sbc_info.samp_freq = ESP_A2D_SBC_CIE_SF_16K;
+    mcc.cie.sbc_info.alloc_mthd = ESP_A2D_SBC_CIE_ALLOC_MTHD_SRN;
+    mcc.cie.sbc_info.num_subbands = ESP_A2D_SBC_CIE_NUM_SUBBANDS_8;
+    ESP_ERROR_CHECK(esp_a2d_sink_register_stream_endpoint(0 /*seid*/, &mcc));
+
+    // register for PCM data
     ESP_ERROR_CHECK(esp_a2d_register_callback(&bt_app_a2d_cb));
     // register for A2DP delay support
     ESP_ERROR_CHECK(esp_a2d_sink_get_delay_value());
@@ -106,8 +115,8 @@ static void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *a2d)
         {
         case ESP_A2D_CONNECTION_STATE_DISCONNECTED:
         {
-            // shutdown audio
-            modulator_stop();
+            // TODO destroy the modulator
+            modulator_destroy();
 
             // make the speaker discoverable
             esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_GENERAL_DISCOVERABLE);
@@ -117,6 +126,9 @@ static void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *a2d)
         {
             // ignore connection attempts
             esp_bt_gap_set_scan_mode(ESP_BT_NON_CONNECTABLE, ESP_BT_NON_DISCOVERABLE);
+
+            // create the modulator
+            modulator_create();
             break;
         }
         default:
@@ -149,17 +161,11 @@ static void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *a2d)
             ESP_LOGI(LOG_TAG,
                      "Audio player config, sample rate: %d, channels: %d,",
                      sample_rate, ch_count);
-            // ESP_LOGD(LOG_TAG,
-            //     "Audio player config, sample rate: %d, channels: %d, "
-            //     " [block_len: %d, min_bitpool: %d, max_bitpool: %d]",
-            //          sample_rate, ch_count,
-            //          p_mcc->cie.sbc_info.block_len,
-            //          p_mcc->cie.sbc_info.min_bitpool,
-            //          p_mcc->cie.sbc_info.max_bitpool
-            //         );
 
-            // TODO configure modulator
-            const modulator_config_t config = {};
+            // configure modulator
+            const modulator_config_t config = {
+                .pcm_sample_rate_hz = sample_rate,
+            };
             modulator_config(&config);
             break;
         }

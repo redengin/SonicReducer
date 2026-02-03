@@ -6,11 +6,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-void modulator_init(void);
+void modulator_create(void);
+
+void modulator_destroy(void);
 
 typedef struct {
     uint32_t pcm_sample_rate_hz;
-    size_t ch_count;    // number of channels [1, 2]
 } modulator_config_t;
 
 /// configure the modulator
