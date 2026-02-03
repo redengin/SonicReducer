@@ -5,32 +5,62 @@ menu "Sonic Reducer"
         help
             Use this option to set local device name.
 
-    # config SONIC_REDUCER_OUTPUT_PIN
-    choice
-        prompt "Select output pin - 40 KHz modulated audio"
-        default SONIC_REDUCER_OUT_1
-        help
-            ESP only supports GPIO pins [0, 1, 3] for I2S mclk output
-
-        config SONIC_REDUCER_OUT_0
-            bool "GPIO 0"
-
-        config SONIC_REDUCER_OUT_1
-            bool "GPIO 1"
-
-        config SONIC_REDUCER_OUT_3
-            bool "GPIO 3"
-    endchoice
-    config SONIC_REDUCER_OUTPUT_PIN
-        int
-        default 0 if SONIC_REDUCER_OUT_0
-        default 1 if SONIC_REDUCER_OUT_1
-        default 3 if SONIC_REDUCER_OUT_3
-
     config SONIC_REDUCER_PIN_CODE
         string "Pairing password (numberals only)"
         default "0000"
         help
             Only four(4) numerals are supported
+
+    choice SONIC_REDUCER_MODULATOR
+        prompt "Choose the type of modulator you need"
+        default SONIC_REDUCER_MODULATOR_L298N
+
+        config SONIC_REDUCER_MODULATOR_L298N
+            bool "LN298N"
+
+        # TODO implement DAC support
+        # config SONIC_REDUCER_MODULATOR_DAC
+        #     bool "DAC"
+    endchoice
+    menu "Modulator Output Pins"
+        visible if SONIC_REDUCER_MODULATOR_L298N
+
+        choice SONIC_REDUCER_L298N_IN1_GPIO
+            prompt "Choose the GPIO connected to L298N IN1"
+
+            config SONIC_REDUCER_L298N_IN1_GPIO_0
+                bool "GPIO 0"
+
+            # config SONIC_REDUCER_L298N_IN1_GPIO_1
+            #     bool "GPIO 1"
+        endchoice
+        choice SONIC_REDUCER_L298N_IN2_GPIO
+            prompt "Choose the GPIO connected to L298N IN2"
+
+            config SONIC_REDUCER_L298N_IN2_GPIO_0
+                bool "GPIO 0"
+
+            # config SONIC_REDUCER_L298N_IN1_GPIO_1
+            #     bool "GPIO 1"
+        endchoice
+    endmenu
+
+    # TODO implement DAC support
+    # menu "Modulator Output Pin"
+    #     visible if SONIC_REDUCER_MODULATOR_DAC
+
+    #     choice SONIC_REDUCER_DAC_GPIO
+    #         prompt "Choose the GPIO connected to L298N IN1"
+    #         default SONIC_REDUCER_DAC_GPIO_25
+
+    #         config SONIC_REDUCER_DAC_GPIO_25
+    #             bool "GPIO 25"
+
+    #         config SONIC_REDUCER_DAC_GPIO_26
+    #             bool "GPIO 26"
+    #     endchoice
+    # endmenu
+
+    # ESP only supports GPIO pins [0, 1, 3] for I2S mclk output
 
 endmenu
