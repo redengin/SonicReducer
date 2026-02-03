@@ -9,7 +9,8 @@ idf_component_register(
     SRCS
         "main.c"
         "bt_a2dp.c"
-        "modulator.c"
+        # "modulator.c"
+        "modulators/modulator_hbridge.c"
     INCLUDE_DIRS
         "."
 )

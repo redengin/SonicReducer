@@ -35,15 +35,6 @@ Modulator
 --------------------------------------------------------------------------------
 This implementation supports using an H-bridge or an amplifier
 
-### H-bridge Modulation
-H-bridge must be driven by two logic inputs (IN1, IN2).
-| IN1   | IN2   | DC Output Polarity |
-|-------|-------|--------------------|
-| true  | false | (+) Positive       |
-| false | true  | (-) Negative       |
-
-When IN1 == IN2 DC Output is ground (0V).
-
 ### Amplifier
 The ESP32 DAC output is 0.08 V - 3.16 V. As these are only positive voltages,
 the amplifier must be designed to these levels, or additional circuitry used

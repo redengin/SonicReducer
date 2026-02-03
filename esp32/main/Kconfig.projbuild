@@ -13,31 +13,31 @@ menu "Sonic Reducer"
 
     choice SONIC_REDUCER_MODULATOR
         prompt "Choose the type of modulator you need"
-        default SONIC_REDUCER_MODULATOR_L298N
+        default SONIC_REDUCER_MODULATOR_HBRIDGE
 
-        config SONIC_REDUCER_MODULATOR_L298N
-            bool "LN298N"
+        config SONIC_REDUCER_MODULATOR_HBRIDGE
+            bool "H-Bridge"
 
         # TODO implement DAC support
         # config SONIC_REDUCER_MODULATOR_DAC
-        #     bool "DAC"
+        #     bool "Amplifier"
     endchoice
     menu "Modulator Output Pins"
-        visible if SONIC_REDUCER_MODULATOR_L298N
+        visible if SONIC_REDUCER_MODULATOR_HBRIDGE
 
-        choice SONIC_REDUCER_L298N_IN1_GPIO
+        choice SONIC_REDUCER_HBRIDGE_IN1_GPIO
             prompt "Choose the GPIO connected to L298N IN1"
 
-            config SONIC_REDUCER_L298N_IN1_GPIO_0
+            config SONIC_REDUCER_HBRIDGE_IN1_GPIO_0
                 bool "GPIO 0"
 
             # config SONIC_REDUCER_L298N_IN1_GPIO_1
             #     bool "GPIO 1"
         endchoice
-        choice SONIC_REDUCER_L298N_IN2_GPIO
+        choice SONIC_REDUCER_HBRIDGE_IN2_GPIO
             prompt "Choose the GPIO connected to L298N IN2"
 
-            config SONIC_REDUCER_L298N_IN2_GPIO_0
+            config SONIC_REDUCER_HBRIDGE_IN2_GPIO_0
                 bool "GPIO 0"
 
             # config SONIC_REDUCER_L298N_IN1_GPIO_1
