@@ -1,12 +1,7 @@
 #![no_std]
 #![no_main]
 
-// Configuration
-//------------------------------------------------------------------------------
-const PCM_SR_HZ: u32 = 8000;
-
-
-use esp_hal::i2s::master::{Channels, UnitConfig};
+use esp_hal::mcpwm::operator::PwmPinConfig;
 // provide panic handler
 use sonic_reducer_esp32::{self as _};
 // use esp_backtrace as _;  // use the esp32 supplied panic handler
@@ -14,74 +9,57 @@ use sonic_reducer_esp32::{self as _};
 // provide logging primitives
 use log::*;
 
-// provide heap allocator
-// use sonic_reducer_esp32::{create_heap};
-
-// provice scheduling primitives
-use embassy_time::{Duration, Timer};
-
-#[esp_rtos::main]
-async fn main(spawner: embassy_executor::Spawner) -> ! {
+#[esp_hal::main]
+fn main() -> ! {
     // initialize the SoC interface
-    let peripherals = esp_hal::init(
-        // max out clock to support radio
-        esp_hal::Config::default().with_cpu_clock(esp_hal::clock::CpuClock::max()),
-    );
+    let peripherals = esp_hal::init(esp_hal::Config::default());
 
     // initialize logging
     esp_println::logger::init_logger_from_env();
     info!("initializing");
 
-    // initialize the rtos
-    use esp_hal::timer::timg::TimerGroup;
-    let timg0 = TimerGroup::new(peripherals.TIMG0);
-    use esp_hal::interrupt::software::SoftwareInterruptControl;
-    let sw_int = SoftwareInterruptControl::new(peripherals.SW_INTERRUPT);
-    esp_rtos::start(timg0.timer0, sw_int.software_interrupt0);
-
-    // create the modulator
-    // FIXME I2S rust support is garbage
-    // let dma_channel = peripherals.DMA_I2S0;
-    // let (mut rx_buffer, rx_descriptors, _, _) = esp_hal::dma_buffers!(4 * 4092, 0);
-    // use esp_hal::i2s::master::I2s;
-    // use esp_hal::i2s::master::Config;
-    // use esp_hal::time::Rate;
-    // use esp_hal::i2s::master::DataFormat;
-    // let i2s = I2s::new(
-    //     peripherals.I2S0,
-    //     dma_channel,
-    //     Config::new_tdm_pcm_short()
-    //         // Input configuration
-    //         .with_sample_rate(Rate::from_hz(PCM_SR_HZ))
-    //         .with_data_format(DataFormat::Data16Channel16)
-    //         .with_channels(Channels::RIGHT)
-    //         // Output configuration
+    // initialize the mcpwm peripheral
+    use esp_hal::mcpwm::{McPwm, PeripheralClockConfig};
+    use esp_hal::time::Rate;
+    // use the default clock
+    let clock_cfg = PeripheralClockConfig::with_prescaler(0);
+    // TODO use a slower clock if it saves power
+    // let clock_cfg = PeripheralClockConfig::with_frequency(
+    //     Rate::from_khz(2 * OUTPUT_FREQ_KHZ) // double source clock for nyquist rate
     // ).unwrap();
-    // let i2s = i2s.with_mclk(peripherals.GPIO0);
-    // let mut i2s_rx = i2s
-    //     .i2s_rx
-    //     .with_bclk(peripherals.GPIO1)
-    //     .with_ws(peripherals.GPIO2)
-    //     .with_din(peripherals.GPIO5)
-    //     .build(rx_descriptors);
-    // let mut transfer = i2s_rx.read_dma_circular(&mut rx_buffer).unwrap();
+    let mut mcpwm = McPwm::new(peripherals.MCPWM0, clock_cfg);
 
-    // initialize the bluetooth hardware
-    // use default 64K heap (required by radio)
-    // create_heap!();
-    // FIXME esp32_radio currently only supports BLE
-    // https://github.com/esp-rs/esp-hal/issues/3401
+    // configure mcpwm for our output
+    const OUTPUT_FREQ_KHZ:u32 = 40; 
+    mcpwm.operator0.set_timer(&mcpwm.timer0);
+    mcpwm.timer0.start(
+        clock_cfg.timer_clock_with_frequency(
+            99, // period [aka duty cycle 0-100]
+            esp_hal::mcpwm::timer::PwmWorkingMode::Increase,
+            Rate::from_khz(OUTPUT_FREQ_KHZ)
+        ).unwrap()
+    );
+
+    // configure coupled pins for H-bridge
+    use esp_hal::mcpwm::operator::DeadTimeCfg;
+    let bridge_active = DeadTimeCfg::new_ahc();
+    let bridge_off = DeadTimeCfg::new_bypass().set_output_swap(PWMStream::PWMA, true);
+    use esp_hal::mcpwm::operator::PWMStream;
+    let mut pins = mcpwm.operator0.with_linked_pins(
+        peripherals.GPIO26,
+        PwmPinConfig::UP_DOWN_ACTIVE_HIGH,
+        peripherals.GPIO27,
+        PwmPinConfig::EMPTY,
+        bridge_off,
+    );
+    pins.set_deadtime_cfg(bridge_active);
+
+    // start the output (50% duty cycle to produce square wave)
+    pins.set_timestamp_a(50 /* duty cycle */);
+
+    info!("emitting 40 KHz signal");
 
     loop {
-        info!("Hello world!");
-        Timer::after(Duration::from_secs(1)).await;
-    }
-}
 
-#[embassy_executor::task]
-async fn task_modulator() -> ! {
-    loop {
-        info!("modulating");
-        Timer::after(Duration::from_secs(1)).await;
     }
 }

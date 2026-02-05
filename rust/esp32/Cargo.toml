@@ -28,28 +28,7 @@ features = ["log-04", "esp32"]
 [dependencies.esp-backtrace]
 git = "https://github.com/esp-rs/esp-hal"
 features = ["println", "colors", "esp32"]
-
-# support ESP32 rtos
-[dependencies.esp-rtos]
-git = "https://github.com/esp-rs/esp-hal"
-features = ["embassy", "esp-radio", "esp-alloc", "esp32"]
-
-# support ESP32 radio
-[dependencies.esp-radio]
-git = "https://github.com/esp-rs/esp-hal"
-features = ["unstable", "esp32"]
-# alloc required by esp-radio
-[dependencies.esp-alloc]
-git = "https://github.com/esp-rs/esp-hal"
-features = [
-    # "internal-heap-stats",  # used to debug memory leaks in esp32 HAL radio
-    "esp32",
-]
-# support reclaiming bootloader RAM for esp-alloc
-[dependencies.esp-bootloader-esp-idf]
-git = "https://github.com/esp-rs/esp-hal"
-features = ["esp32"]
-
+optional = true
 
 [profile.dev]
 # Rust debug is too slow.

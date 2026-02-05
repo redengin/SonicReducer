@@ -8,6 +8,8 @@ Sonic Reducer
 This project provides
 * [parametric speaker system design](docs/hardware.md)
 * embedded rust to generate the modulate the audio signal
+<!--
 * Bluetooth support
     * Use device as Bluetooth speaker
+-->
 

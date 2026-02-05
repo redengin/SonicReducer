@@ -26,12 +26,3 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
         esp_hal::system::software_reset()
     }
 }
-
-#[macro_export]
-macro_rules! create_heap {
-    // provide 64K heap (reclaimed from bootloader)
-    () => {
-        const BOOTLOADER_RAM_SZ: usize = 64 * 1024;
-        esp_alloc::heap_allocator!(#[esp_hal::ram(reclaimed)] size: BOOTLOADER_RAM_SZ);
-    };
-}
