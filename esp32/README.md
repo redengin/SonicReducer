@@ -33,7 +33,7 @@ The esp-idf provides Legacy Bluetooth [A2DP] via the bluedroid stack.
 
 Modulator
 --------------------------------------------------------------------------------
-This implementation supports using an H-bridge or an amplifier
+This implementation supports using an H-bridge or an amplifier.
 
 ### Amplifier
 The ESP32 DAC output is 0.08 V - 3.16 V. As these are only positive voltages,

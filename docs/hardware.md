@@ -5,6 +5,20 @@ Parametric Speaker System
 `Speaker` loudness is voltage dependent - the more voltage the louder the speaker.
 To send the modulated signal to a speaker, you'll need voltage amplification.
 
+### Modulation for Ultrasonic Speaker
+https://en.wikipedia.org/wiki/Sound_from_ultrasound#Modulation_scheme
+> ... distorting effects may be better mitigated by using another modulation scheme that takes
+> advantage of the differential squaring device nature of the nonlinear acoustic effect.
+> Modulation of the second integral of the square root of the desired baseband audio signal,
+> without adding a DC offset, results in convolution in frequency of the modulated square-root
+> spectrum, half the bandwidth of the original signal, with itself due to the nonlinear channel
+> effects. This convolution in frequency is a multiplication in time of the signal by itself, or
+> a squaring. This again doubles the bandwidth of the spectrum, reproducing the second time
+> integral of the input audio spectrum. The double integration corrects for the -ω² filtering
+> characteristic associated with the nonlinear acoustic effect. This recovers the scaled
+> original spectrum at baseband. 
+
+
 Amplification
 ================================================================================
 
