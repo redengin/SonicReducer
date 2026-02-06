@@ -42,15 +42,14 @@ fn main() -> ! {
 
     // configure coupled pins for H-bridge
     use esp_hal::mcpwm::operator::DeadTimeCfg;
-    let bridge_active = DeadTimeCfg::new_ahc();
-    let bridge_off = DeadTimeCfg::new_bypass().set_output_swap(PWMStream::PWMA, true);
+    let bridge_active = DeadTimeCfg::new_ahc(); // Active High Complementary
     use esp_hal::mcpwm::operator::PWMStream;
+    let bridge_off = DeadTimeCfg::new_bypass().set_output_swap(PWMStream::PWMA, true);
     let mut pins = mcpwm.operator0.with_linked_pins(
         peripherals.GPIO26,
         PwmPinConfig::UP_DOWN_ACTIVE_HIGH,
-        peripherals.GPIO27,
-        PwmPinConfig::EMPTY,
-        bridge_off,
+        // complementary pin controlled by AHC
+        peripherals.GPIO27, PwmPinConfig::EMPTY, bridge_off,
     );
     pins.set_deadtime_cfg(bridge_active);
 
