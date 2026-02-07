@@ -8,11 +8,16 @@ cargo run
 Functions
 --------------------------------------------------------------------------------
 * [Modulation](docs/modulation.md) - FM modulation
+    * uses MCPWM to generate a H-Bridge square wave at 40 KHz
+<!--
     * at this this time esp32 rust doesn't support I2S for modulation
 * [BlueTooth](docs/bluetooth.md)
     * at this time esp32 rust doesn't support BlueTooth legacy
+-->
 
 --------------------------------------------------------------------------------
+
+
 ### How this project was created
 #### Prerequisites [Setting up for ESP32 Rust]()
 * [RISC-V and Xtensa](https://docs.esp-rs.org/book/installation/riscv-and-xtensa.html)

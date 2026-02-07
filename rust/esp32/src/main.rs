@@ -46,8 +46,7 @@ fn main() -> ! {
     use esp_hal::mcpwm::operator::PWMStream;
     let bridge_off = DeadTimeCfg::new_bypass().set_output_swap(PWMStream::PWMA, true);
     let mut pins = mcpwm.operator0.with_linked_pins(
-        peripherals.GPIO26,
-        PwmPinConfig::UP_DOWN_ACTIVE_HIGH,
+        peripherals.GPIO26, PwmPinConfig::UP_DOWN_ACTIVE_HIGH,
         // complementary pin controlled by AHC
         peripherals.GPIO27, PwmPinConfig::EMPTY, bridge_off,
     );
@@ -59,6 +58,6 @@ fn main() -> ! {
     info!("emitting 40 KHz signal");
 
     loop {
-
+        // do nothing... let it play forever
     }
 }
