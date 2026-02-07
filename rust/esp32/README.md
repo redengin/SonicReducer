@@ -29,3 +29,14 @@ Functions
 cargo generate https://github.com/esp-rs/esp-template
 # didn't enable advanced template configuration (we'll add the stuff as needed)
 ```
+
+
+Wiring
+================================================================================
+* ESP32 powered by USB
+* L298N powered by LIPO (share a ground with ESP32 for signal integrity)
+    * can handle upto 35 V (8S 29.6 V)
+* Modulated Signal Pins
+    * ESP32 GPIO26 --> L298N IN1
+    * ESP32 GPIO27 --> L298N IN2
+* Ultrasonic speakers connected in parallel to L298N output
